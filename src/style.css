@@ -1,0 +1,17 @@
+
+.info-card {
+    width: 100%;
+    padding: 8px;
+}
+
+.info-size-1 {
+    height: 200px;
+}
+
+.info-size-2 {
+    height: 400px;
+}
+
+.info-size-4 {
+    height: 800px;
+}
