@@ -1,7 +1,7 @@
-import {RealtimeResult} from "./realtime.ts";
-import {MinutelyResult} from "./minutely.ts";
-import {HourlyResult} from "./hourly.ts";
-import {DailyResult} from "./daily.ts";
+import {RealtimeData} from "./realtime.ts";
+import {MinutelyData} from "./minutely.ts";
+import {HourlyData} from "./hourly.ts";
+import {DailyData} from "./daily.ts";
 import {AlertResult} from "./alert.ts";
 import {defaultLongLatitude, LongLatitude, parseCaiyunLLFormat} from "../models.ts";
 import axios from "axios"
@@ -1913,10 +1913,10 @@ export interface Comprehensive {
 
 export interface ComprehensiveResult {
     alert: AlertResult,
-    realtime: RealtimeResult,
-    minutely: MinutelyResult,
-    hourly: HourlyResult,
-    daily: DailyResult,
+    realtime: RealtimeData,
+    minutely: MinutelyData,
+    hourly: HourlyData,
+    daily: DailyData,
     primary: number;
     forecast_keypoint: string;
 }
