@@ -15,11 +15,11 @@ const alertContent = computed(() => props.alertContent);
 
 <template>
   <el-popover
-    width="400px"
+      width="400px"
   >
     <template #reference>
       <div class="alert-card-container">
-        <div style="display: flex; align-items: center; justify-content: space-between">
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: space-between">
           <div style="display: flex; gap: 4px; align-items: center;">
             <el-icon color="white">
               <WarningFilled/>
@@ -53,6 +53,10 @@ const alertContent = computed(() => props.alertContent);
   border-radius: 12px;
   box-shadow: rgba(0, 0, 0, 0.6) 0 0 4px;
   padding: 6px 12px;
+  transition: all 0.2s;
+}
+.alert-card-container:hover {
+  box-shadow: rgba(0, 0, 0, 0.6) 0 0 8px;
 }
 
 </style>
