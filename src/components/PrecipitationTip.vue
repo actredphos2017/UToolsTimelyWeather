@@ -2,7 +2,6 @@
 
 import {computed, ref, watch} from "vue";
 import {MinutelyData} from "../models/caiyunapi/minutely.ts";
-import {getPrecipitationStrengthRectangles} from "../utils/precipitation_utils.ts";
 import {precipitationIcon} from "../utils/icons.ts";
 import {Aim} from "@element-plus/icons-vue";
 

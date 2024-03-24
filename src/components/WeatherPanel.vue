@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 import {Comprehensive} from "../models/caiyunapi/comprehensive.ts";
 import {computed, StyleValue, watch} from "vue";
 import MainCard from "./MainCard.vue";
