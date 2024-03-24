@@ -4,8 +4,10 @@ import AQIBadge from "./AQIBadge.vue";
 import {Comprehensive} from "../models/caiyunapi/comprehensive.ts";
 import {computed, StyleValue} from "vue";
 import {parseWeatherIcon, parseWeatherName} from "../utils/resource_parser";
-import WeatherAlert from "./WeatherAlert.vue";
+import AlertTip from "./AlertTip.vue";
 import {formatDate} from "../utils/utils.ts";
+import PrecipitationTip from "./PrecipitationTip.vue";
+import {precipitationActive} from "../utils/precipitation_utils.ts";
 
 const props = defineProps<{
   weatherInfo: Comprehensive,
@@ -48,14 +50,18 @@ const updateTime = computed(() => formatDate(weatherInfo.value.server_time));
           </div>
         </div>
         <div class="side-info-wrapper" style="align-items: end">
-          <div class="secondary-white-text" style="font-size: smaller">
-            {{ updateTime }} 更新
-          </div>
-          <WeatherAlert
+          <AlertTip
               v-for="alertContent in weatherInfo.result.alert.content"
               :key="alertContent.alertId"
               :alert-content="alertContent"
           />
+          <PrecipitationTip
+              :minutely-data="weatherInfo.result.minutely"
+              v-if="precipitationActive(weatherInfo.result.minutely)"
+          />
+          <div class="secondary-white-text" style="font-size: smaller">
+            {{ updateTime }} 更新
+          </div>
         </div>
       </div>
     </div>
