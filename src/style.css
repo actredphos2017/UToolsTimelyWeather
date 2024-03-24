@@ -1,17 +1,29 @@
 
-.info-card {
-    width: 100%;
-    padding: 8px;
+body {
+    padding: 0;
+    margin: 0;
+}
+
+.main-white-text {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.secondary-white-text {
+    color: rgba(224, 224, 224, 0.8);
+}
+
+.info-container {
+    width: 500px;
 }
 
 .info-size-1 {
-    height: 200px;
+    height: 250px;
 }
 
 .info-size-2 {
-    height: 400px;
+    height: 500px;
 }
 
 .info-size-4 {
-    height: 800px;
+    height: 1000px;
 }

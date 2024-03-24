@@ -1,8 +1,10 @@
 import {RealtimeAirQuality} from "../models/caiyunapi/realtime.ts";
 
-type GasType = 'pm25' | 'pm10' | 'o3' | 'so2' | 'no2' | 'co'
+/** 污染物类型 */
+type GasType = "pm25" | "pm10" | "o3" | "so2" | "no2" | "co"
 
-export interface AqiInstance {
+/** 各项污染物的 IAQI 及主要污染物 */
+export interface IAqiInstance {
     /** PM2.5 */
     pm25: number;
     /** PM10 */
@@ -69,7 +71,7 @@ function findMaxIndex(arr: number[]): number {
     return maxIndex;
 }
 
-export function calculateAqi(airQuality: RealtimeAirQuality): AqiInstance {
+export function calculateIAqi(airQuality: RealtimeAirQuality): IAqiInstance {
     const calculateResult = [
         iaqi(gasTable.co, airQuality.co),
         iaqi(gasTable.no2, airQuality.no2),
@@ -78,7 +80,7 @@ export function calculateAqi(airQuality: RealtimeAirQuality): AqiInstance {
         iaqi(gasTable.pm25, airQuality.pm25),
         iaqi(gasTable.so2, airQuality.so2),
     ];
-    const mainPollutants: GasType = (['co', 'no2', 'o3', 'pm10', 'pm25', 'so2'] as GasType[])[findMaxIndex(calculateResult)];
+    const mainPollutants: GasType = (["co", "no2", "o3", "pm10", "pm25", "so2"] as GasType[])[findMaxIndex(calculateResult)];
     return {
         co: calculateResult[0],
         no2: calculateResult[1],
@@ -88,4 +90,57 @@ export function calculateAqi(airQuality: RealtimeAirQuality): AqiInstance {
         so2: calculateResult[5],
         mainPollutants: mainPollutants,
     }
+}
+
+export type AqiLevel = "优" | "良" | "轻" | "中" | "重" | "严" | '未知';
+
+export type LevelMappingTableEntry = {
+    baseLevel: number,
+    aqiLevel: AqiLevel
+}
+
+const levelMappingTable: LevelMappingTableEntry[] = [
+    {
+        baseLevel: 0,
+        aqiLevel: "优"
+    },
+    {
+        baseLevel: 50,
+        aqiLevel: "良"
+    },
+    {
+        baseLevel: 100,
+        aqiLevel: "轻"
+    },
+    {
+        baseLevel: 150,
+        aqiLevel: "中"
+    },
+    {
+        baseLevel: 200,
+        aqiLevel: "重"
+    },
+    {
+        baseLevel: 300,
+        aqiLevel: "严"
+    },
+]
+
+export function calculateAqiLevel(aqi: number): AqiLevel {
+    for (const item of levelMappingTable.reverse()) {
+        if (aqi >= item.baseLevel) {
+            return item.aqiLevel
+        }
+    }
+    return '未知'
+}
+
+export const aqiColorMapper: Record<AqiLevel, string> = {
+    "优": 'rgba(108,253,113,0.9)',
+    "良": 'rgba(214,253,108,0.9)',
+    "轻": 'rgba(253,160,84,0.9)',
+    "中": 'rgba(253,60,60,0.9)',
+    "重": 'rgba(131,36,68,0.9)',
+    "严": 'rgba(76,22,0,0.9)',
+    '未知': 'rgba(0,0,0,0.9)'
 }

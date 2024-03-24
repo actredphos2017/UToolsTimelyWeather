@@ -52,7 +52,7 @@ function updateWeather() {
 </script>
 
 <template>
-  <div v-if="weatherInfo" style="width: 100%; display: flex; flex-direction: column; align-items: center">
+  <div v-if="weatherInfo" style="width: 100%">
     <WeatherPanel :weather-info="weatherInfo"/>
   </div>
   <div class="failed-content-container" v-else-if="!gettingInfo" @click="updateWeather">
