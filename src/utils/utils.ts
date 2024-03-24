@@ -1,11 +1,10 @@
-
 function getTimeRoundToMinuteString(date: Date) {
     let h = date.getHours().toString();
-    while(h.length < 2) {
+    while (h.length < 2) {
         h = '0' + h;
     }
     let m = date.getMinutes().toString();
-    while(m.length < 2) {
+    while (m.length < 2) {
         m = '0' + m;
     }
     return `${h}:${m}`
