@@ -3,6 +3,9 @@
 import AQIBadge from "./AQIBadge.vue";
 import {Comprehensive} from "../models/caiyunapi/comprehensive.ts";
 import {computed, StyleValue} from "vue";
+import {parseWeatherIcon, parseWeatherName} from "../utils/resource_parser";
+import WeatherAlert from "./WeatherAlert.vue";
+import {formatDate} from "../utils/utils.ts";
 
 const props = defineProps<{
   weatherInfo: Comprehensive,
@@ -12,6 +15,7 @@ const props = defineProps<{
 const weatherInfo = computed(() => props.weatherInfo);
 const backgroundStyle = computed(() => props.backgroundStyle);
 
+const updateTime = computed(() => formatDate(weatherInfo.value.server_time));
 
 </script>
 
@@ -23,30 +27,50 @@ const backgroundStyle = computed(() => props.backgroundStyle);
           {{ weatherInfo.timezone }}
         </span>
       </div>
-      <el-row style="width: 100%;">
-        <el-col :span="12">
-          <div style="display: flex; flex-direction: column; align-self: start; margin: 20px; gap: 4px">
-              <span class="main-white-text" style="align-self: start; font-size: xxx-large">
-              {{ weatherInfo.result.realtime.temperature }}
-              <span style="font-size: xx-large">℃</span>
-            </span>
-            <span class="secondary-white-text" style="align-self: start; font-size: small">
-              体感 {{ weatherInfo.result.realtime.apparent_temperature }} ℃
-            </span>
-            <div style="display: flex; align-items: center; gap: 4px; align-self: start">
-              <span class="secondary-white-text">
-                空气指数 {{ weatherInfo.result.realtime.air_quality.aqi.chn }}
-              </span>
-              <AQIBadge :aqi="weatherInfo.result.realtime.air_quality.aqi.chn"/>
-            </div>
+      <div style="display: flex; justify-content: space-between; width: 100%">
+        <div class="side-info-wrapper" style="align-items: start">
+          <div class="main-white-text" style=" font-size: xxx-large">
+            <span>{{ weatherInfo.result.realtime.temperature }}</span>
+            <span style="font-size: xx-large">℃</span>
           </div>
-        </el-col>
-      </el-row>
+          <div class="secondary-white-text">
+            体感 {{ weatherInfo.result.realtime.apparent_temperature }} ℃
+          </div>
+          <div style="display: flex; gap: 4px; align-items: center">
+            <AQIBadge :aqi="weatherInfo.result.realtime.air_quality.aqi.chn"/>
+            <span class="secondary-white-text">
+              空气指数 {{ weatherInfo.result.realtime.air_quality.aqi.chn }}
+            </span>
+          </div>
+          <div style="display: flex; gap: 4px; align-items: center">
+            <img :src="parseWeatherIcon(weatherInfo.result.realtime.skycon)" alt="天气现象图标" style="width: 24px"/>
+            <span class="secondary-white-text">{{ parseWeatherName(weatherInfo.result.realtime.skycon) }}</span>
+          </div>
+        </div>
+        <div class="side-info-wrapper" style="align-items: end">
+          <div class="secondary-white-text" style="font-size: smaller">
+            {{ updateTime }} 更新
+          </div>
+          <WeatherAlert
+              v-for="alertContent in weatherInfo.result.alert.content"
+              :key="alertContent.alertId"
+              :alert-content="alertContent"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+
+.side-info-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin: 20px;
+  gap: 4px;
+  justify-content: end;
+}
 
 .realtime-info-container {
   width: 100%;
