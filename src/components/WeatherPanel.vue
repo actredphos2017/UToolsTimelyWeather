@@ -34,7 +34,7 @@ const backgroundStyle = computed<StyleValue>(() => {
 
 <template>
   <div class="content-container">
-    <div style="position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -100;" :style="backgroundStyle"/>
+    <div class="background-blur-image" :style="backgroundStyle"/>
     <div class="info-container">
       <el-card
           style="padding: 0"
@@ -124,6 +124,18 @@ const backgroundStyle = computed<StyleValue>(() => {
   align-items: center;
   justify-content: center;
   position: relative;
+}
+
+.background-blur-image {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: -100;
+  filter: blur(12px);
+  transform: scale(1.1);
+  transform-origin: center center;
 }
 
 </style>
