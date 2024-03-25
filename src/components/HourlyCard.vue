@@ -27,17 +27,17 @@ function updateGraph() {
   if (!ctx) return;
 
   const virtualSize = 1000;
-  const defaultLineMapper = definePositionMapper(graph.value, virtualSize);
+  const defaultMapper = definePositionMapper(graph.value, virtualSize);
 
   const temperatures = hourlyInstances.value.map(e => e.temperature);
   const maxTemperature = Math.max(...temperatures.map(e => (e ?? 0)));
   const minTemperature = Math.min(...temperatures.map(e => (e ?? 0)));
   const eachWidth = virtualSize / hourlyInstances.value.length;
-  detailEachWidth.value = defaultLineMapper(eachWidth, 0)[0];
+  detailEachWidth.value = defaultMapper(eachWidth, 0)[0];
 
   // 画分割线
-  const [divisionLineGradientStartX, divisionLineGradientStartY] = defaultLineMapper(0, 0);
-  const [divisionLineGradientEndX, divisionLineGradientEndY] = defaultLineMapper(0, virtualSize);
+  const [divisionLineGradientStartX, divisionLineGradientStartY] = defaultMapper(0, 0);
+  const [divisionLineGradientEndX, divisionLineGradientEndY] = defaultMapper(0, virtualSize);
   const divisionLineGradient = ctx.createLinearGradient(
       divisionLineGradientStartX,
       divisionLineGradientStartY,
@@ -50,8 +50,8 @@ function updateGraph() {
   ctx.strokeStyle = divisionLineGradient;
   for (let i = 1; i < hourlyInstances.value.length; i++) {
     const x = eachWidth * i;
-    const [startX, startY] = defaultLineMapper(x, virtualSize);
-    const [endX, endY] = defaultLineMapper(x, 0);
+    const [startX, startY] = defaultMapper(x, virtualSize);
+    const [endX, endY] = defaultMapper(x, 0);
     ctx.moveTo(startX, startY);
     ctx.lineTo(endX, endY);
   }
