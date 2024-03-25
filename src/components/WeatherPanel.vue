@@ -5,6 +5,7 @@ import MainCard from "./MainCard.vue";
 import {parseWeatherBackground} from "../utils/resource_parser.ts";
 import HourlyCard from "./HourlyCard.vue";
 import DailyCard from "./DailyCard.vue";
+import {caiyunIcon} from "../utils/icons.ts";
 
 const props = defineProps<{
   weatherInfo: Comprehensive
@@ -119,6 +120,19 @@ const backgroundStyle = computed<StyleValue>(() => {
 
           </div>
         </el-card>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 4px">
+      <div class="secondary-white-text" style="font-size: smaller">
+        数据源
+      </div>
+      <el-icon size="28px" v-html="caiyunIcon.template"/>
+      <div class="main-white-text">
+        彩云天气
+      </div>
+      <div class="secondary-white-text" style="font-size: smaller;">
+        API
       </div>
     </div>
 
