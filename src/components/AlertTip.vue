@@ -2,7 +2,7 @@
 
 import {AlertContent} from "../models/caiyunapi/alert.ts";
 import {computed} from "vue";
-import {WarningFilled} from "@element-plus/icons-vue";
+import {Warning} from "@element-plus/icons-vue";
 import {formatDate} from "../utils/utils.ts";
 
 const props = defineProps<{
@@ -19,10 +19,10 @@ const alertContent = computed(() => props.alertContent);
   >
     <template #reference>
       <div class="alert-card-container">
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: space-between">
+        <div style="display: flex; align-items: center; justify-content: space-between">
           <div style="display: flex; gap: 4px; align-items: center;">
             <el-icon color="white">
-              <WarningFilled/>
+              <Warning/>
             </el-icon>
             <div class="main-white-text">
               预警信息

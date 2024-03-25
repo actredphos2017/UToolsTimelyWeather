@@ -4,6 +4,7 @@ import {computed, ref, watch} from "vue";
 import {MinutelyData} from "../models/caiyunapi/minutely.ts";
 import {precipitationIcon} from "../utils/icons.ts";
 import {Aim} from "@element-plus/icons-vue";
+import {definePositionMapper} from "../utils/canvas_utils.ts";
 
 const props = defineProps<{
   minutelyData: MinutelyData
@@ -26,32 +27,26 @@ function updateGraph() {
 
   const dataSet = props.minutelyData.precipitation_2h;
 
-  const fullWidth = graph.value.width;
-  const fullHeight = graph.value.height;
-
   const paddingLeft = 0;
   const paddingRight = 0;
   const paddingTop = 10;
   const paddingBottom = 10;
 
+
   const virtualSize = 1000;
+
+  const positionMapper = definePositionMapper(
+      graph.value,
+      virtualSize,
+      paddingLeft,
+      paddingRight,
+      paddingTop,
+      paddingBottom
+  );
 
   const spacingX = virtualSize / (dataSet.length - 1);
   const maxPrecipitation = Math.max(...dataSet);
 
-  const positionMapper = (
-      pX: number,
-      pY: number,
-      pl = paddingLeft,
-      pr = paddingRight,
-      pt = paddingTop,
-      pb = paddingBottom
-  ) => {
-    return [
-      pl + (fullWidth - pl - pr) * (pX / virtualSize),
-      fullHeight - pb - (fullHeight - pt - pb) * (pY / virtualSize)
-    ];
-  };
 
   // 绘制降水强度参考框
   // getPrecipitationStrengthRectangles(maxPrecipitation, virtualSize).forEach(rect => {
@@ -73,7 +68,6 @@ function updateGraph() {
         index * spacingX,
         (value / maxPrecipitation) * virtualSize
     );
-    console.log(x, y)
     if (index == 0) {
       ctx.moveTo(x, y);
       ctx.beginPath();
@@ -136,6 +130,7 @@ function updateGraph() {
   padding: 6px 12px;
   transition: all 0.2s;
 }
+
 .precipitation-card-container:hover {
   box-shadow: rgba(0, 0, 0, 0.6) 0 0 8px;
 }

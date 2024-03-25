@@ -24,9 +24,9 @@ const updateTime = computed(() => formatDate(weatherInfo.value.server_time));
 <template>
   <div style="width: 100%; position: relative" class="info-size-2" :style="backgroundStyle">
     <div class="realtime-info-container">
-      <div>
-        <span class="main-white-text">
-          {{ weatherInfo.timezone }}
+      <div style="padding-top: 12px">
+        <span class="main-white-text" style="font-size: large;">
+          {{ weatherInfo.result.alert.adcodes.map(entry => entry.name).join(' ') }}
         </span>
       </div>
       <div style="display: flex; justify-content: space-between; width: 100%">
