@@ -3,6 +3,8 @@ import {Comprehensive} from "../models/caiyunapi/comprehensive.ts";
 import {computed, StyleValue, watch} from "vue";
 import MainCard from "./MainCard.vue";
 import {parseWeatherBackground} from "../utils/resource_parser.ts";
+import HourlyCard from "./HourlyCard.vue";
+import DailyCard from "./DailyCard.vue";
 
 const props = defineProps<{
   weatherInfo: Comprehensive
@@ -37,7 +39,7 @@ const backgroundStyle = computed<StyleValue>(() => {
     <div class="background-blur-image" :style="backgroundStyle"/>
     <div class="info-container">
       <el-card
-          style="padding: 0"
+          style="padding: 0; background-color: rgba(255, 255, 255, 0.6)"
           :body-style="{padding: '0'}"
           shadow="hover"
       >
@@ -52,7 +54,19 @@ const backgroundStyle = computed<StyleValue>(() => {
           shadow="hover"
       >
         <div class="info-size-1">
+          <HourlyCard :hourly-data="weatherInfo.result.hourly"/>
+        </div>
+      </el-card>
+    </div>
 
+    <div class="info-container">
+      <el-card
+          style="padding: 0"
+          :body-style="{padding: '0'}"
+          shadow="hover"
+      >
+        <div class="info-size-1">
+          <DailyCard :daily-data="weatherInfo.result.daily"/>
         </div>
       </el-card>
     </div>
@@ -74,6 +88,7 @@ const backgroundStyle = computed<StyleValue>(() => {
             style="padding: 0"
             :body-style="{padding: '0'}"
             shadow="hover"
+
         >
           <div class="info-size-1">
 
