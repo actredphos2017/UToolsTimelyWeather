@@ -15,7 +15,7 @@ body {
 }
 
 .main-black-text {
-    color: rgba(0, 0, 0, 0.9);
+    color: rgba(0, 0, 0);
 }
 
 .secondary-black-text {
@@ -39,9 +39,5 @@ body {
 }
 
 .el-card {
-    background-color: rgba(255, 255, 255, 0.6) !important;
-}
-
-.el-card:hover {
-    background-color: rgba(255, 255, 255, 0.8) !important;
+    background-color: transparent !important;
 }

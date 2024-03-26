@@ -124,9 +124,9 @@ function updateGraph() {
 <template>
   <div style="height: 40px; display: flex; gap: 4px; align-items: center; padding-left: 12px">
     <el-icon v-html="hourlyIcon.template" size="32px"/>
-    <span class="main-black-text" style="font-size: large">
+    <div class="main-black-text" style="font-size: large">
       小时天气
-    </span>
+    </div>
   </div>
   <div style="height: 210px;">
     <el-scrollbar>

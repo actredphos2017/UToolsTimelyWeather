@@ -6,6 +6,7 @@ import {parseWeatherBackground} from "../utils/resource_parser.ts";
 import HourlyCard from "./HourlyCard.vue";
 import DailyCard from "./DailyCard.vue";
 import {caiyunIcon} from "../utils/icons.ts";
+import BlurCard from "./BlurCard.vue";
 
 const props = defineProps<{
   weatherInfo: Comprehensive
@@ -32,12 +33,11 @@ const backgroundStyle = computed<StyleValue>(() => {
   } as StyleValue
 });
 
-
 </script>
 
 <template>
   <div class="content-container">
-    <div class="background-blur-image" :style="backgroundStyle"/>
+    <div :style="backgroundStyle" style="position: fixed; width: 100%; height: 100%; top: 0; z-index: -3"/>
     <div class="info-container">
       <el-card
           style="padding: 0; background-color: rgba(255, 255, 255, 0.6)"
@@ -49,78 +49,33 @@ const backgroundStyle = computed<StyleValue>(() => {
     </div>
 
     <div class="info-container">
-      <el-card
-          style="padding: 0"
-          :body-style="{padding: '0'}"
-          shadow="hover"
-      >
-        <div class="info-size-1">
-          <HourlyCard :hourly-data="weatherInfo.result.hourly"/>
-        </div>
-      </el-card>
+      <BlurCard :realtime-weather-background="realtimeWeatherBackground" info-size="info-size-1">
+        <HourlyCard :hourly-data="weatherInfo.result.hourly"/>
+      </BlurCard>
+    </div>
+
+    <div class="info-container" style="display: flex; gap: 24px">
+      <div style="width: 50%">
+        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" />
+      </div>
+      <div style="width: 50%">
+        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" />
+      </div>
+    </div>
+
+    <div class="info-container" style="display: flex; gap: 24px">
+      <div style="width: 50%">
+        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" />
+      </div>
+      <div style="width: 50%">
+        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" />
+      </div>
     </div>
 
     <div class="info-container">
-      <el-card
-          style="padding: 0"
-          :body-style="{padding: '0'}"
-          shadow="hover"
-      >
-        <div class="info-size-1">
-          <DailyCard :daily-data="weatherInfo.result.daily"/>
-        </div>
-      </el-card>
-    </div>
-
-    <div class="info-container" style="display: flex; gap: 24px">
-      <div style="width: 50%">
-        <el-card
-            style="padding: 0"
-            :body-style="{padding: '0'}"
-            shadow="hover"
-        >
-          <div class="info-size-1">
-
-          </div>
-        </el-card>
-      </div>
-      <div style="width: 50%">
-        <el-card
-            style="padding: 0"
-            :body-style="{padding: '0'}"
-            shadow="hover"
-
-        >
-          <div class="info-size-1">
-
-          </div>
-        </el-card>
-      </div>
-    </div>
-
-    <div class="info-container" style="display: flex; gap: 24px">
-      <div style="width: 50%">
-        <el-card
-            style="padding: 0"
-            :body-style="{padding: '0'}"
-            shadow="hover"
-        >
-          <div class="info-size-1">
-
-          </div>
-        </el-card>
-      </div>
-      <div style="width: 50%">
-        <el-card
-            style="padding: 0"
-            :body-style="{padding: '0'}"
-            shadow="hover"
-        >
-          <div class="info-size-1">
-
-          </div>
-        </el-card>
-      </div>
+      <BlurCard info-size="info-size-2" :realtime-weather-background="realtimeWeatherBackground" >
+        <DailyCard :daily-data="weatherInfo.result.daily"/>
+      </BlurCard>
     </div>
 
     <div style="display: flex; align-items: center; gap: 4px">
@@ -153,18 +108,6 @@ const backgroundStyle = computed<StyleValue>(() => {
   align-items: center;
   justify-content: center;
   position: relative;
-}
-
-.background-blur-image {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  z-index: -100;
-  filter: blur(12px);
-  transform: scale(1.1);
-  transform-origin: center center;
 }
 
 </style>

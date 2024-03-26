@@ -155,11 +155,11 @@ function updateGraph() {
       每日天气
     </span>
   </div>
-  <div style="height: 210px">
+  <div style="height: 460px">
     <el-scrollbar>
-      <div style="width: 1200px; height: 200px; position: relative">
-        <canvas style="position: absolute" ref="graph" width="1200" height="200"/>
-        <div style="display: flex; width: 1200px; height: 200px;">
+      <div style="width: 1200px; height: 450px; position: relative">
+        <canvas style="position: absolute" ref="graph" width="1200" height="450"/>
+        <div style="display: flex; width: 1200px; height: 450px;">
           <el-popover
             v-for="dailyInstance in dailyInstances"
             :key="dailyInstance.date.getTime()"
