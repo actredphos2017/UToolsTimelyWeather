@@ -13,14 +13,19 @@ export function getTimeRoundToMinuteString(date: Date) {
     return `${h}:${m}`
 }
 
-export function formatDate(secondTimeMill: number) {
-    const date = new Date(secondTimeMill * 1000);
+export function formatDate(secondTimeMill: number | Date) {
+    let date: Date;
+    if (typeof secondTimeMill == "number") {
+        date = new Date(secondTimeMill * 1000);
+    } else {
+        date = new Date(secondTimeMill);
+    }
     const nowDate = new Date();
 
     if (
         date.getFullYear() == nowDate.getFullYear() &&
         date.getMonth() == nowDate.getMonth() &&
-        date.getDay() == nowDate.getDay()
+        date.getDate() == nowDate.getDate()
     ) {
         return `${date.getHours()}:${date.getMinutes()}`;
     }
@@ -30,12 +35,61 @@ export function formatDate(secondTimeMill: number) {
     if (
         date.getFullYear() == nowDate.getFullYear() &&
         date.getMonth() == nowDate.getMonth() &&
-        date.getDay() == nowDate.getDay()
+        date.getDate() == nowDate.getDate()
     ) {
         return `昨天 ${getTimeRoundToMinuteString(date)}`;
     }
 
-    return `${date.getMonth()}月${date.getDay()}日 ${getTimeRoundToMinuteString(date)}`;
+    return `${date.getMonth()}月${date.getDate()}日 ${getTimeRoundToMinuteString(date)}`;
+}
+
+const dayMapper = [
+    '星期日',
+    '星期一',
+    '星期二',
+    '星期三',
+    '星期四',
+    '星期五',
+    '星期六'
+]
+
+
+export function getFriendlyDateString(dateValue: string | Date | number) {
+    console.log(dateValue)
+    const nowDate = new Date();
+    const date = new Date(dateValue);
+
+    if (
+        date.getFullYear() == nowDate.getFullYear() &&
+        date.getMonth() == nowDate.getMonth() &&
+        date.getDate() == nowDate.getDate()
+    ) {
+        return '今天';
+    }
+
+    const yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+
+    if (
+        date.getFullYear() == yesterdayDate.getFullYear() &&
+        date.getMonth() == yesterdayDate.getMonth() &&
+        date.getDate() == yesterdayDate.getDate()
+    ) {
+        return '昨天';
+    }
+
+    const tomorrowDate = new Date();
+    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+
+    if (
+        date.getFullYear() == tomorrowDate.getFullYear() &&
+        date.getMonth() == tomorrowDate.getMonth() &&
+        date.getDate() == tomorrowDate.getDate()
+    ) {
+        return '明天';
+    }
+
+    return dayMapper[date.getDay()];
 }
 
 
