@@ -2,9 +2,13 @@
 
 import {DailyData} from "../models/caiyunapi/daily.ts";
 import {computed, ref, watch} from "vue";
-import {getDailyInstance} from "../utils/utils.ts";
+import {DailyInstance, getDailyInstance, getFriendlyDateString} from "../utils/utils.ts";
 import {definePositionMapper} from "../utils/canvas_utils.ts";
 import {dailyIcon} from "../utils/icons.ts";
+import {parseWeatherIcon, parseWeatherName} from "../utils/resource_parser.ts";
+import TipCard from "./TipCard.vue";
+import {Bottom, InfoFilled, Top} from "@element-plus/icons-vue";
+import AQIBadge from "./AQIBadge.vue";
 
 const props = defineProps<{
   dailyData: DailyData
@@ -65,8 +69,8 @@ function updateGraph() {
       virtualSize,
       0,
       0,
-      70,
-      70
+      76,
+      46
   );
   const maxPoints = maxTemperatures.map(
       (value, index) => ({
@@ -146,38 +150,199 @@ function updateGraph() {
   ctx.save();
 }
 
+const tipVisible = ref(false);
+const targetDailyInstance = ref<DailyInstance | null>(null);
+
+function mouseEnterDetailBlock(dailyInstance: DailyInstance) {
+  targetDailyInstance.value = dailyInstance;
+  tipVisible.value = true;
+}
+
+function mouseLeaveDetailBlock() {
+  targetDailyInstance.value = null;
+  tipVisible.value = false;
+}
+
 </script>
 
 <template>
   <div style="height: 40px; display: flex; gap: 4px; align-items: center; padding-left: 12px">
     <el-icon v-html="dailyIcon.template" size="32px"/>
     <span class="main-black-text" style="font-size: large">
-      每日天气
+      未来天气
     </span>
   </div>
-  <div style="height: 460px">
+  <div style="height: 210px">
     <el-scrollbar>
-      <div style="width: 1200px; height: 450px; position: relative">
-        <canvas style="position: absolute" ref="graph" width="1200" height="450"/>
-        <div style="display: flex; width: 1200px; height: 450px;">
-          <el-popover
-            v-for="dailyInstance in dailyInstances"
-            :key="dailyInstance.date.getTime()"
-          >
-            <template #reference>
-              <div
-                  class="detail-block"
-                  style="z-index: 10"
-                  :style="{width: `${detailEachWidth}px`}"
-              >
+      <div style="width: 1200px; height: 200px; position: relative">
+        <canvas style="position: absolute" ref="graph" width="1200" height="200"/>
+        <div
+            style="display: flex; width: 1200px; height: 200px;"
+            @mouseleave="mouseLeaveDetailBlock"
+        >
+          <div
+              v-for="dailyInstance in dailyInstances"
+              :key="dailyInstance.date.getTime()"
 
+              @mouseenter="mouseEnterDetailBlock(dailyInstance)"
+
+              class="detail-block"
+              style="z-index: 10; display: flex; flex-direction: column; justify-content: space-between; align-items: center"
+              :style="{width: `${detailEachWidth}px`}"
+          >
+
+            <div
+                style="height: 72px; margin-bottom: 10px; display: flex; flex-direction: column; align-items: center; justify-content: space-between">
+              <div class="main-black-text" style="font-weight: 500">
+                {{ getFriendlyDateString(dailyInstance.date) }}
               </div>
-            </template>
-          </el-popover>
+              <div style="display: flex; flex-direction: column; align-items: center">
+                <img :src="parseWeatherIcon(dailyInstance.skycon_08h_20h)" style="width: 24px;" alt="天气图标"/>
+                <div class="secondary-black-text" style="font-size: small">
+                  {{ Math.round((dailyInstance.temperature?.max ?? 0) * 10) / 10 }}℃
+                </div>
+              </div>
+
+            </div>
+            <div
+                style="margin-top: 10px; display: flex; flex-direction: column; align-items: center; justify-content: end">
+              <div class="secondary-black-text" style="font-size: small">
+                {{ Math.round((dailyInstance.temperature?.min ?? 0) * 10) / 10 }}℃
+              </div>
+              <img :src="parseWeatherIcon(dailyInstance.skycon_20h_32h)" style="width: 24px;" alt="天气图标"/>
+            </div>
+          </div>
         </div>
       </div>
     </el-scrollbar>
   </div>
+
+  <TipCard v-if="tipVisible && targetDailyInstance">
+    <div style="width: 300px; display: flex; flex-direction: column; gap: 8px">
+
+      <div style="display: flex; align-items: center; gap: 4px">
+        <el-icon>
+          <InfoFilled/>
+        </el-icon>
+        <div>
+          {{ targetDailyInstance.date.toLocaleDateString() }}
+        </div>
+      </div>
+
+      <div style="width: 100%; display: flex; justify-content: space-around">
+
+        <div style="display: flex; flex-direction: column; align-items: center">
+          <div style="font-weight: 600">
+            综合
+          </div>
+          <div style="display: flex; font-size: small; align-items: center; color: #66aaf3">
+            <img :src="parseWeatherIcon(targetDailyInstance.skycon)" style="width: 32px;" alt="综合天气图标"/>
+            <div v-if="targetDailyInstance.precipitation && targetDailyInstance.precipitation.probability > 0">
+              {{ targetDailyInstance.precipitation!.probability }}%
+            </div>
+          </div>
+          <div>
+            {{ parseWeatherName(targetDailyInstance.skycon) }}
+          </div>
+          <div style="display: flex; align-items: center; width: 100%; justify-content: space-between">
+            <el-icon color="#ff4231">
+              <Top/>
+            </el-icon>
+            <div>{{ Math.round((targetDailyInstance.temperature?.max ?? 0) * 10) / 10 }}℃</div>
+          </div>
+          <div style="display: flex; align-items: center; width: 100%; justify-content: space-between">
+            <el-icon color="#399aff">
+              <Bottom/>
+            </el-icon>
+            <div>{{ Math.round((targetDailyInstance.temperature?.min ?? 0) * 10) / 10 }}℃</div>
+          </div>
+        </div>
+
+
+        <el-divider direction="vertical" style="height: 100px; align-self: center"/>
+
+
+        <div style="display: flex; flex-direction: column; align-items: center">
+          <div style="font-weight: 600">
+            日间
+          </div>
+          <div style="display: flex; font-size: small; align-items: center; color: #66aaf3">
+            <img :src="parseWeatherIcon(targetDailyInstance.skycon_08h_20h)" style="width: 32px;" alt="综合天气图标"/>
+            <div
+                v-if="targetDailyInstance.precipitation_08h_20h && targetDailyInstance.precipitation_08h_20h.probability > 0">
+              {{ targetDailyInstance.precipitation_08h_20h!.probability }}%
+            </div>
+          </div>
+          <div>
+            {{ parseWeatherName(targetDailyInstance.skycon_08h_20h) }}
+          </div>
+          <div style="display: flex; align-items: center; width: 100%; justify-content: space-between">
+            <el-icon color="#ff4231">
+              <Top/>
+            </el-icon>
+            <div>{{ Math.round((targetDailyInstance.temperature_08h_20h?.max ?? 0) * 10) / 10 }}℃</div>
+          </div>
+          <div style="display: flex; align-items: center; width: 100%; justify-content: space-between">
+            <el-icon color="#399aff">
+              <Bottom/>
+            </el-icon>
+            <div>{{ Math.round((targetDailyInstance.temperature_08h_20h?.min ?? 0) * 10) / 10 }}℃</div>
+          </div>
+        </div>
+
+
+        <el-divider direction="vertical" style="height: 100px; align-self: center"/>
+
+
+        <div style="display: flex; flex-direction: column; align-items: center">
+          <div style="font-weight: 600">
+            夜间
+          </div>
+          <div style="display: flex; font-size: small; align-items: center; color: #66aaf3">
+            <img :src="parseWeatherIcon(targetDailyInstance.skycon_20h_32h)" style="width: 32px;" alt="综合天气图标"/>
+            <div
+                v-if="targetDailyInstance.precipitation_20h_32h && targetDailyInstance.precipitation_20h_32h.probability > 0">
+              {{ targetDailyInstance.precipitation_20h_32h!.probability }}%
+            </div>
+          </div>
+          <div>
+            {{ parseWeatherName(targetDailyInstance.skycon_20h_32h) }}
+          </div>
+          <div style="display: flex; align-items: center; width: 100%; justify-content: space-between">
+            <el-icon color="#ff4231">
+              <Top/>
+            </el-icon>
+            <div>{{ Math.round((targetDailyInstance.temperature_20h_32h?.max ?? 0) * 10) / 10 }}℃</div>
+          </div>
+          <div style="display: flex; align-items: center; width: 100%; justify-content: space-between">
+            <el-icon color="#399aff">
+              <Bottom/>
+            </el-icon>
+            <div>{{ Math.round((targetDailyInstance.temperature_20h_32h?.min ?? 0) * 10) / 10 }}℃</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-index-box" v-if="targetDailyInstance.aqi">
+        <div style="font-size: small">AQI</div>
+        <div style="display: flex; align-items: center; gap: 4px">
+          <div>{{ targetDailyInstance.aqi!.avg.chn }}</div>
+          <AQIBadge :aqi="targetDailyInstance.aqi!.avg.chn"/>
+        </div>
+      </div>
+      <div class="detail-index-box" v-if="targetDailyInstance.pm25">
+        <div style="font-size: small; display: flex; align-items: baseline">
+          <span>PM</span>
+          <span style="transform-origin: left bottom; transform: scale(0.7)">25</span>
+        </div>
+        <div>{{ targetDailyInstance.pm25!.avg }}</div>
+      </div>
+    </div>
+    <div class="detail-index-box">
+      <div style="font-size: small">气压</div>
+      <div>{{ targetDailyInstance.pressure?.avg }}</div>
+    </div>
+  </TipCard>
 
 </template>
 
@@ -185,6 +350,12 @@ function updateGraph() {
 
 .detail-block {
   height: 100%;
+}
+
+.detail-index-box {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .detail-block:hover {

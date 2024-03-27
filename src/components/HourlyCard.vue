@@ -3,11 +3,12 @@
 import {HourlyData} from "../models/caiyunapi/hourly.ts";
 import {computed, ref, watch} from "vue";
 import {definePositionMapper} from "../utils/canvas_utils.ts";
-import {getHourlyInstances, getTimeRoundToMinuteString} from "../utils/utils.ts";
+import {getHourlyInstances, getTimeRoundToMinuteString, HourlyInstance} from "../utils/utils.ts";
 import {hourlyIcon} from "../utils/icons.ts";
 import {parseWeatherIcon, parseWeatherName} from "../utils/resource_parser.ts";
 import {InfoFilled} from "@element-plus/icons-vue";
 import AQIBadge from "./AQIBadge.vue";
+import TipCard from "./TipCard.vue";
 
 const props = defineProps<{
   hourlyData: HourlyData
@@ -119,6 +120,18 @@ function updateGraph() {
   });
 }
 
+const tipVisible = ref(false);
+const targetHourlyInstance = ref<HourlyInstance | null>(null);
+
+function mouseEnterDetailBlock(hourlyInstance: HourlyInstance) {
+  targetHourlyInstance.value = hourlyInstance;
+  tipVisible.value = true;
+}
+function mouseLeaveDetailBlock() {
+  targetHourlyInstance.value = null;
+  tipVisible.value = false;
+}
+
 </script>
 
 <template>
@@ -132,83 +145,85 @@ function updateGraph() {
     <el-scrollbar>
       <div style="width: 1600px; height: 200px; position: relative;">
         <canvas ref="graph" width="1600" height="200" style="position: absolute;"/>
-        <div style="display: flex; width: 1600px; height: 200px;">
-          <el-popover
+        <div
+            style="display: flex; width: 1600px; height: 200px;"
+            @mouseleave="mouseLeaveDetailBlock"
+        >
+          <div
               v-for="hourlyInstance in hourlyInstances"
               :key="hourlyInstance.date.getTime()"
-              placement="bottom"
-              width="300px"
+
+              class="detail-block"
+              style="z-index: 10; display: flex; flex-direction: column; justify-content: space-between"
+              :style="{width: `${detailEachWidth}px`}"
+              @mouseenter="mouseEnterDetailBlock(hourlyInstance)"
           >
-            <template #reference>
-              <div
-                  class="detail-block"
-                  style="z-index: 10; display: flex; flex-direction: column; justify-content: space-between"
-                  :style="{width: `${detailEachWidth}px`}"
-              >
-                <div v-if="hourlyInstance.skycon" style="width: 100%; display: flex; align-items: center; flex-direction: column; gap: 4px">
-                  <img :src="parseWeatherIcon(hourlyInstance.skycon)" style="width: 32px" alt="天气图标" />
-                  <span class="secondary-black-text" style="font-size: small; font-weight: bold">
+            <div v-if="hourlyInstance.skycon"
+                 style="width: 100%; display: flex; align-items: center; flex-direction: column; gap: 4px">
+              <img :src="parseWeatherIcon(hourlyInstance.skycon)" style="width: 32px" alt="天气图标"/>
+              <span class="secondary-black-text" style="font-size: small; font-weight: bold">
                     {{ parseWeatherName(hourlyInstance.skycon) }}
                   </span>
-                </div>
-                <div class="secondary-black-text" style="width: 100%; text-align: center; padding-bottom: 16px; font-size: medium">
-                  {{ getTimeRoundToMinuteString(hourlyInstance.date) }}
-                </div>
-              </div>
-            </template>
-            <div style="width: 100%; display: flex; flex-direction: column">
-              <div style="display: flex; align-items: center; gap: 4px">
-                <el-icon>
-                  <InfoFilled/>
-                </el-icon>
-                <div>
-                  {{ hourlyInstance.date.toLocaleString() }}
-                </div>
-              </div>
-              <div style="font-size: large">
-                {{ hourlyInstance.temperature }}℃
-              </div>
-              <div style="font-size: medium">
-                体感 {{ hourlyInstance.apparent_temperature }}℃
-              </div>
-              <div v-if="hourlyInstance.skycon" style="font-size: medium; display: flex; align-items: center; gap: 4px">
-                <span>{{ parseWeatherName(hourlyInstance.skycon) }}</span>
-                <img :src="parseWeatherIcon(hourlyInstance.skycon)" style="width: 32px" alt="天气图标" />
-                <div v-if="hourlyInstance.precipitation && hourlyInstance.precipitation.probability > 0" style="display: flex; flex-direction: column; font-size: small; color: #66aaf3">
-                  <span>{{ hourlyInstance.precipitation.probability }}%</span>
-                  <span>{{ hourlyInstance.precipitation.value }}mm</span>
-                </div>
-              </div>
-              <div v-if="hourlyInstance.aqi" style="display: flex; align-items: center; gap: 4px">
-                <span>空气污染指数 {{ hourlyInstance.aqi.chn }}</span>
-                <AQIBadge :aqi="hourlyInstance.aqi.chn" />
-              </div>
-              <div>
-                PM2.5 {{ hourlyInstance.pm25 }}
-              </div>
-              <div>
-                能见度 {{ hourlyInstance.visibility }}
-              </div>
-              <div>
-                气压 {{ hourlyInstance.pressure }}
-              </div>
-              <div>
-                相对湿度 {{ hourlyInstance.humidity }}
-              </div>
-              <div>
-                云量 {{ hourlyInstance.cloudrate }}
-              </div>
-              <div>
-                向下短波辐射通量 {{ hourlyInstance.dswrf }}W/M2
-              </div>
-
             </div>
-          </el-popover>
+            <div class="secondary-black-text"
+                 style="width: 100%; text-align: center; padding-bottom: 16px; font-size: medium">
+              {{ getTimeRoundToMinuteString(hourlyInstance.date) }}
+            </div>
+          </div>
         </div>
       </div>
     </el-scrollbar>
   </div>
 
+  <TipCard v-if="tipVisible && targetHourlyInstance">
+    <div style="width: 300px; display: flex; flex-direction: column">
+      <div style="display: flex; align-items: center; gap: 4px">
+        <el-icon>
+          <InfoFilled/>
+        </el-icon>
+        <div>
+          {{ targetHourlyInstance.date.toLocaleString() }}
+        </div>
+      </div>
+      <div style="font-size: large">
+        {{ targetHourlyInstance.temperature }}℃
+      </div>
+      <div style="font-size: medium">
+        体感 {{ targetHourlyInstance.apparent_temperature }}℃
+      </div>
+      <div v-if="targetHourlyInstance.skycon" style="font-size: medium; display: flex; align-items: center; gap: 4px; height: 40px">
+        <span>{{ parseWeatherName(targetHourlyInstance.skycon) }}</span>
+        <img :src="parseWeatherIcon(targetHourlyInstance.skycon)" style="width: 32px" alt="天气图标"/>
+        <div v-if="targetHourlyInstance.precipitation && targetHourlyInstance.precipitation.probability > 0"
+             style="display: flex; flex-direction: column; font-size: small; color: #66aaf3">
+          <span>{{ targetHourlyInstance.precipitation!.probability }}%</span>
+          <span>{{ targetHourlyInstance.precipitation!.value }}mm</span>
+        </div>
+      </div>
+      <div v-if="targetHourlyInstance.aqi" style="display: flex; align-items: center; gap: 4px">
+        <span>空气污染指数 {{ targetHourlyInstance.aqi!.chn }}</span>
+        <AQIBadge :aqi="targetHourlyInstance.aqi.chn"/>
+      </div>
+      <div>
+        PM2.5 {{ targetHourlyInstance.pm25 }}
+      </div>
+      <div>
+        能见度 {{ targetHourlyInstance.visibility }}
+      </div>
+      <div>
+        气压 {{ targetHourlyInstance.pressure }}
+      </div>
+      <div>
+        相对湿度 {{ targetHourlyInstance.humidity }}
+      </div>
+      <div>
+        云量 {{ targetHourlyInstance.cloudrate }}
+      </div>
+      <div>
+        向下短波辐射通量 {{ targetHourlyInstance.dswrf }}W/M2
+      </div>
+    </div>
+  </TipCard>
 </template>
 
 <style scoped>
