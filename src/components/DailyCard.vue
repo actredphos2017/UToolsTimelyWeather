@@ -9,6 +9,7 @@ import {parseWeatherIcon, parseWeatherName} from "../utils/resource_parser.ts";
 import TipCard from "./TipCard.vue";
 import {Bottom, InfoFilled, Top} from "@element-plus/icons-vue";
 import AQIBadge from "./AQIBadge.vue";
+import WindBadge from "./WindBadge.vue";
 
 const props = defineProps<{
   dailyData: DailyData
@@ -218,7 +219,7 @@ function mouseLeaveDetailBlock() {
   </div>
 
   <TipCard v-if="tipVisible && targetDailyInstance">
-    <div style="width: 300px; display: flex; flex-direction: column; gap: 8px">
+    <div style="display: flex; flex-direction: column; gap: 8px">
 
       <div style="display: flex; align-items: center; gap: 4px">
         <el-icon>
@@ -256,6 +257,12 @@ function mouseLeaveDetailBlock() {
             </el-icon>
             <div>{{ Math.round((targetDailyInstance.temperature?.min ?? 0) * 10) / 10 }}℃</div>
           </div>
+          <div>
+            <WindBadge
+                v-if="targetDailyInstance.wind"
+                :wind="targetDailyInstance.wind!.avg"
+            />
+          </div>
         </div>
 
 
@@ -288,6 +295,12 @@ function mouseLeaveDetailBlock() {
             </el-icon>
             <div>{{ Math.round((targetDailyInstance.temperature_08h_20h?.min ?? 0) * 10) / 10 }}℃</div>
           </div>
+          <div>
+            <WindBadge
+                v-if="targetDailyInstance.wind_08h_20h"
+                :wind="targetDailyInstance.wind_08h_20h!.avg"
+            />
+          </div>
         </div>
 
 
@@ -319,6 +332,12 @@ function mouseLeaveDetailBlock() {
               <Bottom/>
             </el-icon>
             <div>{{ Math.round((targetDailyInstance.temperature_20h_32h?.min ?? 0) * 10) / 10 }}℃</div>
+          </div>
+          <div>
+            <WindBadge
+                v-if="targetDailyInstance.wind_20h_32h"
+                :wind="targetDailyInstance.wind_20h_32h!.avg"
+            />
           </div>
         </div>
       </div>

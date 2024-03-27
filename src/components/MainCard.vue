@@ -8,6 +8,7 @@ import AlertTip from "./AlertTip.vue";
 import {formatDate} from "../utils/utils.ts";
 import PrecipitationTip from "./PrecipitationTip.vue";
 import {precipitationActive} from "../utils/precipitation_utils.ts";
+import WindBadge from "./WindBadge.vue";
 
 const props = defineProps<{
   weatherInfo: Comprehensive,
@@ -48,6 +49,10 @@ const updateTime = computed(() => formatDate(weatherInfo.value.server_time));
             <img :src="parseWeatherIcon(weatherInfo.result.realtime.skycon)" alt="天气现象图标" style="width: 24px"/>
             <span class="secondary-white-text">{{ parseWeatherName(weatherInfo.result.realtime.skycon) }}</span>
           </div>
+          <WindBadge
+              :wind="weatherInfo.result.realtime.wind"
+              outer-font-color="white"
+          />
         </div>
         <div class="side-info-wrapper" style="align-items: end">
           <AlertTip
