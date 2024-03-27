@@ -147,7 +147,7 @@ export function parseWeatherBackground(skycon: string, timestampInSeconds: numbe
     }
 }
 
-export function parseWeatherName(code: string): string {
+export function parseWeatherName(code: string | undefined): string {
     switch (code) {
         case 'CLEAR_DAY':
         case 'CLEAR_NIGHT':
@@ -192,7 +192,7 @@ export function parseWeatherName(code: string): string {
     }
 }
 
-export function parseWeatherIcon(weatherCode: string): string {
+export function parseWeatherIcon(weatherCode: string | undefined): string {
     switch(weatherCode) {
         case 'CLEAR_DAY': return ic('sunny_icon');
         case 'CLEAR_NIGHT': return ic('sunny_night_icon');
