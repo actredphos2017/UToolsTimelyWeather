@@ -78,7 +78,7 @@ onUnmounted(() => {
   position: absolute;
   width: 100%;
   height: 100%;
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.4);
   z-index: -1;
   transition: all 0.2s;
 }
