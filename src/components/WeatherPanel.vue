@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {Comprehensive} from "../models/caiyunapi/comprehensive.ts";
-import {computed, StyleValue, watch} from "vue";
+import {computed, onMounted, onUnmounted, ref, StyleValue, watch} from "vue";
 import MainCard from "./MainCard.vue";
 import {parseWeatherBackground} from "../utils/resource_parser.ts";
 import HourlyCard from "./HourlyCard.vue";
@@ -25,12 +25,36 @@ const realtimeWeatherBackground = computed(
     )
 );
 
-const backgroundStyle = computed<StyleValue>(() => {
-  return {
-    backgroundImage: `url('${realtimeWeatherBackground.value}')`,
-    backgroundPosition: 'center',
-    backgroundSize: 'cover'
-  } as StyleValue
+const weatherPictureStyle = computed<StyleValue>(() => ({
+  backgroundImage: `url('${realtimeWeatherBackground.value}')`,
+  backgroundPosition: 'center',
+  backgroundSize: 'cover',
+} as StyleValue));
+
+const backgroundStyle = computed<StyleValue>(() => ({
+  backgroundImage: `url('${realtimeWeatherBackground.value}')`,
+  backgroundPosition: 'center',
+  backgroundSize: 'cover',
+  filter: `blur(${bgBlurRadius.value}px)`,
+  transform: `scale(${bgScale.value})`
+} as StyleValue));
+
+const bgBlurRadius = ref(24);
+const bgScale = ref(1.2);
+
+const onScroll = () => {
+  let progress = (500 - window.scrollY) / 500;
+  if (progress < 0) progress = 0;
+  bgBlurRadius.value = 24 * progress;
+  bgScale.value = 1 + 0.2 * progress;
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', onScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', onScroll);
 });
 
 </script>
@@ -44,7 +68,7 @@ const backgroundStyle = computed<StyleValue>(() => {
           :body-style="{padding: '0'}"
           shadow="hover"
       >
-        <MainCard :weather-info="weatherInfo" :background-style="backgroundStyle"/>
+        <MainCard :weather-info="weatherInfo" :background-style="weatherPictureStyle"/>
       </el-card>
     </div>
 
@@ -55,29 +79,28 @@ const backgroundStyle = computed<StyleValue>(() => {
     </div>
 
     <div class="info-container">
-      <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" >
+      <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground">
         <DailyCard :daily-data="weatherInfo.result.daily"/>
       </BlurCard>
     </div>
 
     <div class="info-container" style="display: flex; gap: 24px">
       <div style="width: 50%">
-        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" />
+        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground"/>
       </div>
       <div style="width: 50%">
-        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" />
+        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground"/>
       </div>
     </div>
 
     <div class="info-container" style="display: flex; gap: 24px">
       <div style="width: 50%">
-        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" />
+        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground"/>
       </div>
       <div style="width: 50%">
-        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" />
+        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground"/>
       </div>
     </div>
-
 
 
     <div style="display: flex; align-items: center; gap: 4px">
