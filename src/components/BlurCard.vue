@@ -31,29 +31,26 @@ const fixedLeft = ref(0);
 const windowWidth = ref(0);
 const windowHeight = ref(0);
 
-const scrollHandler = () => {
+const rePosition = () => {
   const rect = fixedElement.value?.getBoundingClientRect();
   fixedTop.value = 0 - (rect?.top ?? 0);
   fixedLeft.value = 0 - (rect?.left ?? 0);
-}
-
-const resizeHandler = () => {
   windowWidth.value = window.innerWidth;
   windowHeight.value = window.innerHeight;
 }
 
-watch(fixedElement, scrollHandler, {immediate: true});
+watch(fixedElement, rePosition, {immediate: true});
 
 onMounted(() => {
   windowWidth.value = window.innerWidth;
   windowHeight.value = window.innerHeight;
-  window.addEventListener('scroll', scrollHandler);
-  window.addEventListener('resize', resizeHandler);
+  window.addEventListener('scroll', rePosition);
+  window.addEventListener('resize', rePosition);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', scrollHandler);
-  window.removeEventListener('resize', resizeHandler);
+  window.removeEventListener('scroll', rePosition);
+  window.removeEventListener('resize', rePosition);
 });
 
 </script>
@@ -81,7 +78,7 @@ onUnmounted(() => {
   position: absolute;
   width: 100%;
   height: 100%;
-  background-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.6);
   z-index: -1;
   transition: all 0.2s;
 }
