@@ -54,29 +54,31 @@ const backgroundStyle = computed<StyleValue>(() => {
       </BlurCard>
     </div>
 
-    <div class="info-container" style="display: flex; gap: 24px">
-      <div style="width: 50%">
-        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" />
-      </div>
-      <div style="width: 50%">
-        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" />
-      </div>
-    </div>
-
-    <div class="info-container" style="display: flex; gap: 24px">
-      <div style="width: 50%">
-        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" />
-      </div>
-      <div style="width: 50%">
-        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" />
-      </div>
-    </div>
-
     <div class="info-container">
-      <BlurCard info-size="info-size-2" :realtime-weather-background="realtimeWeatherBackground" >
+      <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" >
         <DailyCard :daily-data="weatherInfo.result.daily"/>
       </BlurCard>
     </div>
+
+    <div class="info-container" style="display: flex; gap: 24px">
+      <div style="width: 50%">
+        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" />
+      </div>
+      <div style="width: 50%">
+        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" />
+      </div>
+    </div>
+
+    <div class="info-container" style="display: flex; gap: 24px">
+      <div style="width: 50%">
+        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" />
+      </div>
+      <div style="width: 50%">
+        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground" />
+      </div>
+    </div>
+
+
 
     <div style="display: flex; align-items: center; gap: 4px">
       <div class="secondary-white-text" style="font-size: smaller">
