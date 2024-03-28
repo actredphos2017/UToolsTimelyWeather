@@ -29,7 +29,6 @@ onMounted(() => {
 const targetLocation = ref<SavableLocation | undefined>();
 
 function toEnterApiToken() {
-  console.log('a')
   displayTokenEnterDialog.value = true;
 }
 
@@ -41,11 +40,11 @@ function addCity() {
   cityAddDialog.value = true;
 }
 
-function updateWeather() {
+function updateWeather(force: boolean = false) {
   if (targetLocation.value) {
     gettingInfo.value = true
     weatherHistory
-        .updateHistory(targetLocation.value)
+        .updateHistory(targetLocation.value, force)
         .then(res => {
           weatherInfo.value = res
         })
@@ -82,7 +81,9 @@ function updateWeather() {
 }
 
 
-watch(targetLocation, updateWeather, {immediate: true});
+watch(targetLocation, () => {
+  updateWeather()
+}, {immediate: true});
 
 const gettingInfo = ref(false);
 
@@ -115,7 +116,7 @@ function switchCity(index: number) {
         :on-add-city="addCity"
         :on-setting="toEnterApiToken"
         :on-switch-to-city="switchCity"
-        :on-refresh="updateWeather"
+        :on-refresh="() => updateWeather(true)"
     />
   </div>
   <div v-if="weatherInfo" style="width: 100%">
