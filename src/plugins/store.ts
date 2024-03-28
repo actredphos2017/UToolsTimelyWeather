@@ -5,43 +5,35 @@ import {
     toSavableLocationFromCityCenter,
     toSignalStringFromSavableLocation
 } from "../models/city_center.ts";
-import {Comprehensive, ComprehensiveErrorData, getComprehensive} from "../models/caiyunapi/comprehensive.ts";
+import {Comprehensive, getComprehensive} from "../models/caiyunapi/comprehensive.ts";
 import {utoolsStorage} from "../utils/preload_receiver";
 
 export const useWeatherHistoryStore = defineStore({
     id: 'weatherHistory',
     state: () => ({
-        history: new Map<string, Comprehensive>()
+        history: {} as Record<string, Comprehensive>
     }),
     actions: {
         async updateHistory(loc: SavableLocation, force: boolean = false): Promise<Comprehensive> {
             const signalString = toSignalStringFromSavableLocation(loc);
-            if (this.history.get(signalString) && !force) {
-                const offset = new Date().getTime() / 1000 - this.history.get(signalString)!.server_time;
-                if (offset > 600) {
-                    return new Promise((resolve, reject) => {
-                        getComprehensive(useSettingStore().caiyunToken, loc)
-                            .then(resolve)
-                            .catch((r: any) => {
-                                if (r && r.data) {
-                                    reject(r.data as ComprehensiveErrorData);
-                                } else reject(undefined);
-                            });
-                    });
-                } else {
-                    return this.history.get(signalString)!;
-                }
-            } else {
-                return new Promise((resolve, reject) => {
-                    getComprehensive(useSettingStore().caiyunToken, loc)
-                        .then(resolve)
-                        .catch((r: any) => {
-                            if (r && r.data) {
-                                reject(r.data as ComprehensiveErrorData);
-                            } else reject(undefined);
+            return (this.history[signalString] && !force) ? (
+                (new Date().getTime() / 1000 - this.history[signalString]!.server_time > 600) ?
+                    new Promise((resolve, reject) => {
+                        getComprehensive(useSettingStore().caiyunToken, loc).then(com => {
+                            this.history[signalString] = com;
+                            resolve(com);
+                        }).catch((status: number) => {
+                            reject(status);
                         });
+                    }) : this.history[signalString]
+            ) : new Promise((resolve, reject) => {
+                getComprehensive(useSettingStore().caiyunToken, loc).then(com => {
+                    this.history[signalString] = com;
+                    resolve(com);
+                }).catch((status: number) => {
+                    reject(status);
                 });
-            }
+            });
         },
     },
     persist: {

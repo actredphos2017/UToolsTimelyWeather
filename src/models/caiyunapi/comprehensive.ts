@@ -7,37 +7,22 @@ import {defaultLongLatitude, LongLatitude, parseCaiyunLLFormat} from "../models.
 import axios from "axios"
 
 export function getComprehensiveUrl(token: string, position: LongLatitude = defaultLongLatitude) {
-    return `https://api.caiyunapp.com/v2.6/TAkhjf8d1nlSlspN/${parseCaiyunLLFormat(position)}/weather?alert=true&dailysteps=1&hourlysteps=24&token=${token}`
+    return `https://api.caiyunapp.com/v2.6/TAkhjf8d1nlSlspN/${parseCaiyunLLFormat(position)}/weather?alert=true&dailysteps=14&hourlysteps=24&token=${token}`
 }
 
-export async function getComprehensive(token: string, position: LongLatitude = defaultLongLatitude) {
+export async function getComprehensive(token: string, position: LongLatitude = defaultLongLatitude): Promise<Comprehensive> {
     return new Promise<Comprehensive>((resolve, reject) => {
         if (/^\s*$/.test(token)) {
-            reject({
-                data: {
-                    api_version: 'v2.6',
-                    error: 'token is invalid'
-                } as ComprehensiveErrorData
-            })
+            reject(0)
         }
         axios.get(getComprehensiveUrl(token, position))
             .then((response) => {
-                const data = response.data as Comprehensive;
-                if (data.status == 'ok') {
-                    resolve(response.data as Comprehensive)
-                } else {
-                    reject(response)
-                }
+                resolve(response.data as Comprehensive)
             })
-            .catch(e => {
-                reject(e.response)
+            .catch((e) => {
+                reject((e.response as Response).status)
             });
     });
-}
-
-export interface ComprehensiveErrorData {
-    api_version: string;
-    error: string | 'token is invalid' | "'latitude out of bounds!'";
 }
 
 export interface Comprehensive {

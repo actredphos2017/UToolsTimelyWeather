@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {Comprehensive, ComprehensiveErrorData} from "./models/caiyunapi/comprehensive.ts";
+import {Comprehensive} from "./models/caiyunapi/comprehensive.ts";
 import {onMounted, ref, watch} from "vue";
 import WeatherPanel from "./components/WeatherPanel.vue";
 import {ElLoading, ElMessage} from "element-plus";
@@ -43,32 +43,41 @@ function addCity() {
 
 function updateWeather() {
   if (targetLocation.value) {
+    gettingInfo.value = true
     weatherHistory
         .updateHistory(targetLocation.value)
         .then(res => {
           weatherInfo.value = res
         })
-        .catch((e: ComprehensiveErrorData | undefined) => {
-          if (e) {
-            switch (e.error) {
-              case "token is invalid": {
-                toEnterApiToken();
-                ElMessage.error('彩云天气 TOKEN 不可用');
-                break;
-              }
-              case "'latitude out of bounds!'": {
-                ElMessage.error('目标地区不可用');
-                break;
-              }
-              default: {
-                ElMessage.error(e.error)
-                break;
-              }
+        .catch((status: number) => {
+          switch (status) {
+            case 0: {
+              toEnterApiToken();
+              ElMessage.error('未提供彩云天气 TOKEN');
+              break;
             }
-          } else {
-            ElMessage.error('远程服务不可用，请检查你的网络设置');
+            case 400: {
+              toEnterApiToken();
+              ElMessage.error('彩云天气 TOKEN 不正确');
+              break;
+            }
+            case 422: {
+              ElMessage.error('目标地区不可用');
+              break;
+            }
+            case 429: {
+              ElMessage.error('请求过于频繁，请稍后重试');
+              break;
+            }
+            default: {
+              ElMessage.error(`请求失败，状态码 ${status}`)
+              break;
+            }
           }
-        });
+        })
+        .finally(() => {
+          gettingInfo.value = false;
+        })
   }
 }
 
