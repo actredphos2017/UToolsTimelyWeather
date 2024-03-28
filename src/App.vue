@@ -1,18 +1,79 @@
 <script setup lang="ts">
-import {
-  Comprehensive,
-  // getComprehensiveTestFailed,
-  getComprehensiveTestSuccess
-} from "./models/caiyunapi/comprehensive.ts";
+import {Comprehensive, ComprehensiveErrorData} from "./models/caiyunapi/comprehensive.ts";
 import {onMounted, ref, watch} from "vue";
 import WeatherPanel from "./components/WeatherPanel.vue";
-import {ElLoading} from "element-plus";
+import {ElLoading, ElMessage} from "element-plus";
+import TopBar from "./components/TopBar.vue";
+import {SavableLocation} from "./models/city_center.ts";
+import {useLocationListStore, useWeatherHistoryStore} from "./plugins/store.ts";
+import AddLocationDialog from "./components/AddLocationDialog.vue";
+import TokenEnterDialog from "./components/TokenEnterDialog.vue";
 
-const weatherInfo = ref<null | Comprehensive>(null)
+const weatherHistory = useWeatherHistoryStore();
+const cityList = useLocationListStore();
+
+const weatherInfo = ref<undefined | Comprehensive>();
 
 onMounted(() => {
-  updateWeather()
-});
+  console.log(cityList.favoriteIndex)
+  console.log(cityList.userLocations.length);
+  if (cityList.favoriteIndex) {
+    targetLocation.value = cityList.userLocations[cityList.favoriteIndex];
+  } else if (cityList.userLocations.length > 0) {
+    targetLocation.value = cityList.userLocations[0];
+  } else {
+    addCity();
+  }
+})
+
+const targetLocation = ref<SavableLocation | undefined>();
+
+function toEnterApiToken() {
+  console.log('a')
+  displayTokenEnterDialog.value = true;
+}
+
+const cityAddDialog = ref(false);
+
+const displayTokenEnterDialog = ref(false);
+
+function addCity() {
+  cityAddDialog.value = true;
+}
+
+function updateWeather() {
+  if (targetLocation.value) {
+    weatherHistory
+        .updateHistory(targetLocation.value)
+        .then(res => {
+          weatherInfo.value = res
+        })
+        .catch((e: ComprehensiveErrorData | undefined) => {
+          if (e) {
+            switch (e.error) {
+              case "token is invalid": {
+                toEnterApiToken();
+                ElMessage.error('彩云天气 TOKEN 不可用');
+                break;
+              }
+              case "'latitude out of bounds!'": {
+                ElMessage.error('目标地区不可用');
+                break;
+              }
+              default: {
+                ElMessage.error(e.error)
+                break;
+              }
+            }
+          } else {
+            ElMessage.error('远程服务不可用，请检查你的网络设置');
+          }
+        });
+  }
+}
+
+
+watch(targetLocation, updateWeather, {immediate: true});
 
 const gettingInfo = ref(false);
 
@@ -31,34 +92,37 @@ watch(gettingInfo, newValue => {
       loading = null;
     }
   }
-}, {immediate: true})
+}, {immediate: true});
 
-function updateWeather() {
-  gettingInfo.value = true;
-  getComprehensiveTestSuccess('TOKEN')
-      .then(res => {
-        console.log(res);
-        weatherInfo.value = res;
-      })
-      .catch(e => {
-        console.log(e);
-        weatherInfo.value = null;
-      })
-      .finally(() => {
-        gettingInfo.value = false;
-      })
+function switchCity(index: number) {
+  targetLocation.value = cityList.userLocations[index];
 }
 
 </script>
 
 <template>
+  <div style="position: absolute; width: 100%; z-index: 100">
+    <TopBar
+        :on-add-city="addCity"
+        :on-setting="toEnterApiToken"
+        :on-switch-to-city="switchCity"
+    />
+  </div>
   <div v-if="weatherInfo" style="width: 100%">
     <WeatherPanel :weather-info="weatherInfo"/>
   </div>
-  <div class="failed-content-container" v-else-if="!gettingInfo" @click="updateWeather">
+  <div class="failed-content-container" v-else-if="!gettingInfo">
     <el-text>获取失败</el-text>
-    <el-button @click="updateWeather">点击重试</el-button>
   </div>
+
+  <AddLocationDialog
+      v-model="cityAddDialog"
+  />
+
+  <TokenEnterDialog
+      v-model="displayTokenEnterDialog"
+  />
+
 </template>
 
 <style scoped>
