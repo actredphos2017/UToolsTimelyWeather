@@ -6,6 +6,7 @@ import {
     toSignalStringFromSavableLocation
 } from "../models/city_center.ts";
 import {Comprehensive, ComprehensiveErrorData, getComprehensive} from "../models/caiyunapi/comprehensive.ts";
+import {utoolsStorage} from "../utils/preload_receiver";
 
 export const useWeatherHistoryStore = defineStore({
     id: 'weatherHistory',
@@ -41,9 +42,11 @@ export const useWeatherHistoryStore = defineStore({
                         });
                 });
             }
-        }
+        },
     },
-    persist: true,
+    persist: {
+        storage: utoolsStorage
+    }
 });
 
 export const useSettingStore = defineStore({
@@ -56,7 +59,9 @@ export const useSettingStore = defineStore({
             this.caiyunToken = token;
         }
     },
-    persist: true
+    persist: {
+        storage: utoolsStorage
+    }
 });
 
 export const useLocationListStore = defineStore({
@@ -80,5 +85,7 @@ export const useLocationListStore = defineStore({
                 this.favoriteIndex = index;
         }
     },
-    persist: true
+    persist: {
+        storage: utoolsStorage
+    }
 });
