@@ -125,7 +125,7 @@ onUnmounted(() => {
   width: 100%;
   min-height: 90vh;
   height: fit-content;
-  padding: 20px 0;
+  padding: 60px 20px 0 0;
   display: flex;
   gap: 24px;
   flex-direction: column;
