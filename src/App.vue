@@ -48,11 +48,21 @@ function updateWeather(force: boolean = false) {
         .then(res => {
           weatherInfo.value = res
         })
-        .catch((status: number) => {
-          switch (status) {
+        .catch((status: {
+          code: number,
+          oldData?: Comprehensive
+        }) => {
+          if (status.oldData) {
+            weatherInfo.value = status.oldData
+          }
+          switch (status.code) {
             case 0: {
               toEnterApiToken();
               ElMessage.error('未提供彩云天气 TOKEN');
+              break;
+            }
+            case 1: {
+              ElMessage.error('请求超时，请检查网络设置');
               break;
             }
             case 400: {

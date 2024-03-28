@@ -15,12 +15,18 @@ export async function getComprehensive(token: string, position: LongLatitude = d
         if (/^\s*$/.test(token)) {
             reject(0)
         }
-        axios.get(getComprehensiveUrl(token, position))
+        axios.get(getComprehensiveUrl(token, position), {
+            timeout: 5000
+        })
             .then((response) => {
                 resolve(response.data as Comprehensive)
             })
             .catch((e) => {
-                reject((e.response as Response).status)
+                if (e.response && typeof e.response.status == 'number') {
+                    reject(e.response.status as number)
+                } else {
+                    reject(1)
+                }
             });
     });
 }

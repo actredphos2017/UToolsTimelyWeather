@@ -23,7 +23,10 @@ export const useWeatherHistoryStore = defineStore({
                             this.history[signalString] = com;
                             resolve(com);
                         }).catch((status: number) => {
-                            reject(status);
+                            reject({
+                                code: status,
+                                oldData: this.history[signalString]
+                            });
                         });
                     }) : this.history[signalString]
             ) : new Promise((resolve, reject) => {
@@ -31,7 +34,10 @@ export const useWeatherHistoryStore = defineStore({
                     this.history[signalString] = com;
                     resolve(com);
                 }).catch((status: number) => {
-                    reject(status);
+                    reject({
+                        code: status,
+                        oldData: undefined
+                    });
                 });
             });
         },
