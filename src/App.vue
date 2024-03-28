@@ -106,6 +106,7 @@ function switchCity(index: number) {
         :on-add-city="addCity"
         :on-setting="toEnterApiToken"
         :on-switch-to-city="switchCity"
+        :on-refresh="updateWeather"
     />
   </div>
   <div v-if="weatherInfo" style="width: 100%">

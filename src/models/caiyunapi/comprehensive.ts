@@ -14,9 +14,11 @@ export async function getComprehensive(token: string, position: LongLatitude = d
     return new Promise<Comprehensive>((resolve, reject) => {
         if (/^\s*$/.test(token)) {
             reject({
-                api_version: 'v2.6',
-                error: 'token is invalid'
-            } as ComprehensiveErrorData)
+                data: {
+                    api_version: 'v2.6',
+                    error: 'token is invalid'
+                } as ComprehensiveErrorData
+            })
         }
         axios.get(getComprehensiveUrl(token, position))
             .then((response) => {
