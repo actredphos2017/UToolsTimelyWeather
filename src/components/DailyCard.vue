@@ -27,6 +27,7 @@ function updateGraph() {
   if (!graph.value) return;
   let ctx = graph.value.getContext('2d');
   if (!ctx) return;
+  ctx.clearRect(0, 0, graph.value!.width, graph.value!.height);
 
   const virtualSize = 1000;
 
