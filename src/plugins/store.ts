@@ -66,15 +66,18 @@ export const useLocationListStore = defineStore({
     id: 'locationList',
     state: () => ({
         userLocations: [] as SavableLocation[],
-        favoriteIndex: null as number | null
+        favoriteIndex: 0
     }),
     actions: {
         pushCityCenter(cityCenter: CityCenter) {
             this.userLocations.push(toSavableLocationFromCityCenter(cityCenter))
         },
+        pushSavableLocation(loc: SavableLocation) {
+            this.userLocations.push(loc);
+        },
         removeLocationAtIndex(index: number) {
             if (this.favoriteIndex == index) {
-                this.favoriteIndex = null;
+                this.favoriteIndex = 0;
             }
             this.userLocations.splice(index, 1);
         },

@@ -16,7 +16,10 @@ export interface SavableLocation {
 }
 
 export function toSignalStringFromSavableLocation(loc: SavableLocation) {
-    return JSON.stringify(loc);
+    return JSON.stringify({
+        lo: loc.longitude,
+        la: loc.latitude
+    });
 }
 
 export function toSavableLocationFromSignalString(str: string) {

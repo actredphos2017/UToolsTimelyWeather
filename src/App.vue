@@ -5,26 +5,38 @@ import WeatherPanel from "./components/WeatherPanel.vue";
 import {ElLoading, ElMessage} from "element-plus";
 import TopBar from "./components/TopBar.vue";
 import {SavableLocation} from "./models/city_center.ts";
-import {useLocationListStore, useWeatherHistoryStore} from "./plugins/store.ts";
+import {useLocationListStore, useSettingStore, useWeatherHistoryStore} from "./plugins/store.ts";
 import AddLocationDialog from "./components/AddLocationDialog.vue";
 import TokenEnterDialog from "./components/TokenEnterDialog.vue";
+import GuideDialog from "./components/GuideDialog.vue";
 
 const weatherHistory = useWeatherHistoryStore();
 const cityList = useLocationListStore();
+const settings = useSettingStore();
 
 const weatherInfo = ref<undefined | Comprehensive>();
 
-onMounted(() => {
-  console.log(cityList.favoriteIndex)
-  console.log(cityList.userLocations.length);
-  if (cityList.favoriteIndex) {
-    targetLocation.value = cityList.userLocations[cityList.favoriteIndex];
-  } else if (cityList.userLocations.length > 0) {
-    targetLocation.value = cityList.userLocations[0];
+const checkRequirement = () => cityList.userLocations.length > 0 && !(/^\s*$/.test(settings.caiyunToken));
+
+function startGuide() {
+  displayGuideDialog.value = true
+}
+
+function initApp() {
+  if (checkRequirement()) {
+    if (cityList.userLocations.length > 0) {
+      targetLocation.value = cityList.userLocations[cityList.favoriteIndex];
+    } else {
+      toAddCity();
+    }
   } else {
-    addCity();
+    startGuide();
   }
-})
+}
+
+onMounted(() => {
+  initApp();
+});
 
 const targetLocation = ref<SavableLocation | undefined>();
 
@@ -36,7 +48,9 @@ const cityAddDialog = ref(false);
 
 const displayTokenEnterDialog = ref(false);
 
-function addCity() {
+const displayGuideDialog = ref(false);
+
+function toAddCity() {
   cityAddDialog.value = true;
 }
 
@@ -123,7 +137,7 @@ function switchCity(index: number) {
 <template>
   <div style="position: absolute; width: 100%; z-index: 100">
     <TopBar
-        :on-add-city="addCity"
+        :on-add-city="toAddCity"
         :on-setting="toEnterApiToken"
         :on-switch-to-city="switchCity"
         :on-refresh="() => updateWeather(true)"
@@ -142,6 +156,13 @@ function switchCity(index: number) {
 
   <TokenEnterDialog
       v-model="displayTokenEnterDialog"
+  />
+
+  <GuideDialog
+      v-model="displayGuideDialog"
+      :on-set-locations="toAddCity"
+      :on-set-token="toEnterApiToken"
+      :on-finish="initApp"
   />
 
 </template>

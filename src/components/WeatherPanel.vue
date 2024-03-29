@@ -84,25 +84,6 @@ onUnmounted(() => {
       </BlurCard>
     </div>
 
-    <div class="info-container" style="display: flex; gap: 24px">
-      <div style="width: 50%">
-        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground"/>
-      </div>
-      <div style="width: 50%">
-        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground"/>
-      </div>
-    </div>
-
-    <div class="info-container" style="display: flex; gap: 24px">
-      <div style="width: 50%">
-        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground"/>
-      </div>
-      <div style="width: 50%">
-        <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground"/>
-      </div>
-    </div>
-
-
     <div style="display: flex; align-items: center; gap: 4px">
       <div class="secondary-white-text" style="font-size: smaller">
         数据源
@@ -125,7 +106,7 @@ onUnmounted(() => {
   width: 100%;
   min-height: 90vh;
   height: fit-content;
-  padding: 60px 20px 0 0;
+  padding: 36px 20px 0 0;
   display: flex;
   gap: 24px;
   flex-direction: column;

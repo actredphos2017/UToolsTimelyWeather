@@ -130,7 +130,7 @@ function removeCity(index: number) {
 .top-bar-container {
   width: calc(100% - 40px);
   padding: 0 20px;
-  height: 40px;
+  height: 32px;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
