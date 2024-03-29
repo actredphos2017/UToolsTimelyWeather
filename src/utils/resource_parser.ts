@@ -17,7 +17,7 @@ function parseTimeRange(timestampInSeconds: number): TimeRange {
 }
 
 function bg(id: string) {
-    return new URL(`../assets/weather_backgrounds/${id}.png`, import.meta.url).href
+    return new URL(`../assets/weather_backgrounds/${id}.jpg`, import.meta.url).href
 }
 
 function ic(id: string) {
