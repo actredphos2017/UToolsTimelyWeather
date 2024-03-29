@@ -16,7 +16,23 @@ const citySearchKey = ref('');
 const searching = ref(false);
 const searchResult = ref<undefined | CityCenter[]>();
 
-const locating = ref(false);
+const locatingCountdown = ref(0);
+let interval: NodeJS.Timeout | undefined = undefined;
+
+function setCountdown(countdown: number) {
+  locatingCountdown.value = countdown;
+  interval = setInterval(() => {
+    locatingCountdown.value--;
+    if (locatingCountdown.value <= 0) {
+      clearInterval(interval);
+    }
+  }, 1000);
+}
+
+function stopCountdown() {
+  clearInterval(interval);
+  locatingCountdown.value = 0;
+}
 
 const locateResult = ref<LongLatitude | null>(null);
 const gettingLocateCityInfo = ref(false);
@@ -39,10 +55,9 @@ function submitGeoLocation() {
 }
 
 function getGeoLocation() {
+  setCountdown(10);
   if (navigator.geolocation) {
-    locating.value = true;
     navigator.geolocation.getCurrentPosition((position) => {
-      locating.value = false;
       if (position.coords.longitude && position.coords.latitude) {
         locateResult.value = {
           latitude: Math.round(position.coords.latitude * 10000) / 10000,
@@ -50,8 +65,11 @@ function getGeoLocation() {
         };
         getCityInfo();
       }
+      stopCountdown();
     }, () => {
-      locating.value = false;
+      stopCountdown();
+    }, {
+      timeout: 10000
     });
   }
 }
@@ -174,16 +192,7 @@ function addSavableLocation(loc: SavableLocation) {
     <div style="width: 100%; display: flex; justify-content: center">
       <el-tabs>
         <el-tab-pane label="通过定位">
-          <div v-if="locating"
-               style="width: 100%; display: flex; align-items: center; gap: 4px; justify-content: center">
-            <el-icon>
-              <Location/>
-            </el-icon>
-            <div>
-              获取中……
-            </div>
-          </div>
-          <div v-else-if="locateResult">
+          <div v-if="locateResult">
             <div
                 style="width: 100%; display: flex; align-items: center; flex-direction: column; gap: 16px; padding: 20px 0;">
               <el-card style="width: calc(100% - 16px); margin: 0 8px">
@@ -219,10 +228,20 @@ function addSavableLocation(loc: SavableLocation) {
                 </div>
               </el-card>
 
-              <el-button style="align-self: end" type="primary" :disabled="!geoLocationSubmittable" @click="submitGeoLocation">
+              <el-button style="align-self: end" type="primary" :disabled="!geoLocationSubmittable"
+                         @click="submitGeoLocation">
                 添加
               </el-button>
 
+            </div>
+          </div>
+          <div v-else-if="locatingCountdown > 0"
+               style="width: 100%; display: flex; align-items: center; gap: 4px; justify-content: center">
+            <el-icon>
+              <Location/>
+            </el-icon>
+            <div>
+              获取中({{ locatingCountdown }})……
             </div>
           </div>
           <div v-else>
@@ -238,10 +257,10 @@ function addSavableLocation(loc: SavableLocation) {
               <QuestionFilled/>
             </el-icon>
             <span>
-              您可以前往
+              您可以前往 lbs.amap.com/tools/picker
             </span>
-            <a href="https://lbs.amap.com/tools/picker">
-              lbs.amap.com/tools/picker
+            <a href="https://lbs.amap.com/tools/picker" class="styled-a-tag">
+              高德坐标拾取器
             </a>
             <span>
               手动获取经纬度信息，然后在本页面第三栏 <span style="font-weight: bold">通过输入经纬度</span> 完善当前位置信息
@@ -249,13 +268,13 @@ function addSavableLocation(loc: SavableLocation) {
             <br/>
             <br/>
             <span>
-              Tip: 无论如何，精确的经纬度信息能为您提供更加准确的天气信息
+              Tip: 精确的经纬度信息能够让您获取到的天气信息更加准确
             </span>
           </div>
         </el-tab-pane>
         <el-tab-pane label="通过城市名搜索">
           <div style="width: 100%; display: flex; flex-direction: column; gap: 8px">
-            <div style="display: flex; align-items: center">
+            <div style="display: flex; align-items: center; gap: 4px;">
               <el-icon>
                 <Warning/>
               </el-icon>
@@ -309,6 +328,20 @@ function addSavableLocation(loc: SavableLocation) {
         </el-tab-pane>
         <el-tab-pane label="通过输入经纬度">
           <div style="width: 100%; padding: 20px 0; display: flex; flex-direction: column; gap: 16px">
+            <div>
+              <el-icon>
+                <QuestionFilled/>
+              </el-icon>
+              <span>
+                您可以前往 lbs.amap.com/tools/picker
+              </span>
+              <a href="https://lbs.amap.com/tools/picker" class="styled-a-tag">
+                高德坐标拾取器
+              </a>
+              <span>
+                手动获取经纬度信息
+              </span>
+            </div>
             <el-card style="width: calc(100% - 16px); margin: 0 8px">
               <div style="width: 100%; display: flex; align-items: center; justify-content: space-between">
                 <div style="display: flex; flex-direction: column">
@@ -324,13 +357,25 @@ function addSavableLocation(loc: SavableLocation) {
 
                 <div>
                   <div style="display: flex; align-items: center; gap: 4px">
-                    经
-                    <el-input v-model="inputLocationForm.longitude" style="width: 100px"/>
+                    <div style="font-weight: bold; font-size: large">
+                      经
+                    </div>
+                    <el-input
+                        v-model="inputLocationForm.longitude"
+                        style="width: 120px"
+                        placeholder="国内 73~136"
+                    />
                   </div>
 
                   <div style="display: flex; align-items: center; gap: 4px">
-                    纬
-                    <el-input v-model="inputLocationForm.latitude" style="width: 100px"/>
+                    <div style="font-weight: bold; font-size: large">
+                      纬
+                    </div>
+                    <el-input
+                        v-model="inputLocationForm.latitude"
+                        style="width: 120px"
+                        placeholder="国内 3~54"
+                    />
                   </div>
                 </div>
               </div>

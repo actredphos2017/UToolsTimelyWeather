@@ -46,3 +46,8 @@ body::-webkit-scrollbar {
 .el-card {
     background-color: transparent !important;
 }
+
+.styled-a-tag {
+    text-decoration-line: none;
+    color: #66aaf3
+}

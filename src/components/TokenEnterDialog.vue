@@ -39,7 +39,7 @@ function setToken() {
           <QuestionFilled/>
         </el-icon>
         <div style="font-size: small">
-          请前往 <a href="https://platform.caiyunapp.com">platform.caiyunapp.com</a> 根据指引获取调用 TOKEN
+          请前往 platform.caiyunapp.com <a href="https://platform.caiyunapp.com" class="styled-a-tag">彩云开放平台</a> 根据指引获取调用 TOKEN
         </div>
       </div>
       <el-button @click="setToken" style="align-self: end">
