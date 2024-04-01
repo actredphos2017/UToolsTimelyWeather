@@ -7,6 +7,7 @@ import {
 } from "../models/city_center.ts";
 import {Comprehensive, getComprehensive} from "../models/caiyunapi/comprehensive.ts";
 import {utoolsStorage} from "../utils/preload_receiver";
+import {publicToken} from "../utils/public_token.ts";
 
 export const useWeatherHistoryStore = defineStore({
     id: 'weatherHistory',
@@ -16,11 +17,18 @@ export const useWeatherHistoryStore = defineStore({
     actions: {
         async updateHistory(loc: SavableLocation, force: boolean = false): Promise<Comprehensive> {
             const signalString = toSignalStringFromSavableLocation(loc);
-            return (this.history[signalString] && !force) ? (
-                (new Date().getTime() / 1000 - this.history[signalString]!.server_time > 600) ?
-                    new Promise((resolve, reject) => {
-                        getComprehensive(useSettingStore().caiyunToken, loc).then(com => {
+            if (this.history[signalString] && (!force || useSettingStore().usePublicToken)) {
+                if (new Date().getTime() / 1000 - this.history[signalString]!.server_time > (useSettingStore().usePublicToken ? 1800 : 600)) {
+                    if (useSettingStore().usePublicToken && useSettingStore().getFrequent1h() >= 5) {
+                        throw {
+                            code: 2,
+                            oldData: this.history[signalString]
+                        }
+                    }
+                    return new Promise((resolve, reject) => {
+                        getComprehensive(useSettingStore().getToken, loc).then(com => {
                             this.history[signalString] = com;
+                            useSettingStore().record();
                             resolve(com);
                         }).catch((status: number) => {
                             reject({
@@ -28,18 +36,24 @@ export const useWeatherHistoryStore = defineStore({
                                 oldData: this.history[signalString]
                             });
                         });
-                    }) : this.history[signalString]
-            ) : new Promise((resolve, reject) => {
-                getComprehensive(useSettingStore().caiyunToken, loc).then(com => {
-                    this.history[signalString] = com;
-                    resolve(com);
-                }).catch((status: number) => {
-                    reject({
-                        code: status,
-                        oldData: undefined
+                    });
+                } else {
+                    return this.history[signalString];
+                }
+            } else {
+                return new Promise((resolve, reject) => {
+                    getComprehensive(useSettingStore().getToken, loc).then(com => {
+                        this.history[signalString] = com;
+                        useSettingStore().record();
+                        resolve(com);
+                    }).catch((status: number) => {
+                        reject({
+                            code: status,
+                            oldData: undefined
+                        });
                     });
                 });
-            });
+            }
         },
     },
     persist: {
@@ -50,11 +64,27 @@ export const useWeatherHistoryStore = defineStore({
 export const useSettingStore = defineStore({
     id: 'settings',
     state: () => ({
-        caiyunToken: ''
+        caiyunToken: '',
+        usePublicToken: false,
+        frequent: [] as number[]
     }),
     actions: {
         updateCaiyunToken(token: string) {
             this.caiyunToken = token;
+        },
+        record() {
+            this.frequent.push(new Date().getTime());
+        },
+        getFrequent1h() {
+            const oneHourBefore = new Date();
+            oneHourBefore.setHours(oneHourBefore.getHours() - 1);
+            this.frequent = this.frequent.filter(e => e > oneHourBefore.getTime());
+            return this.frequent.length;
+        }
+    },
+    getters: {
+        getToken(): string {
+            return this.usePublicToken ? publicToken : this.caiyunToken;
         }
     },
     persist: {
