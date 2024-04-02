@@ -16,19 +16,13 @@ const settings = useSettingStore();
 
 const weatherInfo = ref<undefined | Comprehensive>();
 
-const checkRequirement = () => cityList.userLocations.length > 0 && !(/^\s*$/.test(settings.caiyunToken));
-
 function startGuide() {
   displayGuideDialog.value = true
 }
 
 function initApp() {
-  if (checkRequirement()) {
-    if (cityList.userLocations.length > 0) {
-      targetLocation.value = cityList.userLocations[cityList.favoriteIndex];
-    } else {
-      toAddCity();
-    }
+  if (cityList.userLocations.length > 0 && settings.good) {
+    targetLocation.value = cityList.userLocations[cityList.favoriteIndex];
   } else {
     startGuide();
   }

@@ -25,12 +25,11 @@ const props = withDefaults(defineProps<{
 const settings = useSettingStore();
 const locationList = useLocationListStore();
 
-const caiyunToken = computed(() => settings.caiyunToken);
-const tokenGood = computed(() => !(/^\s*$/.test(settings.caiyunToken)));
+const caiyunToken = computed(() => settings.usePublicToken ? '选用公共 Token' : settings.caiyunToken);
 
 const locationCount = computed(() => locationList.userLocations.length);
 
-const allDone = computed(() => locationCount.value > 0 && tokenGood.value);
+const allDone = computed(() => locationCount.value > 0 && settings.good);
 
 function handleClose(done: () => void) {
   if (allDone.value) {
@@ -72,7 +71,7 @@ function handleDone() {
           彩云 TOKEN
         </td>
         <td style="padding-left: 20px">
-          <div v-if="tokenGood" style="color: #67c23a">
+          <div v-if="settings.good" style="color: #67c23a">
             {{ caiyunToken }}
           </div>
           <div v-else style="color: #c45656">

@@ -85,6 +85,9 @@ export const useSettingStore = defineStore({
     getters: {
         getToken(): string {
             return this.usePublicToken ? publicToken : this.caiyunToken;
+        },
+        good(): boolean {
+            return this.usePublicToken || !(/^\s*$/.test(this.caiyunToken));
         }
     },
     persist: {
