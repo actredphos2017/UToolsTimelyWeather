@@ -137,7 +137,7 @@ function mouseLeaveDetailBlock() {
 
 <template>
   <div style="height: 40px; display: flex; gap: 4px; align-items: center; padding-left: 12px">
-    <el-icon v-html="hourlyIcon.template" size="32px"/>
+    <el-icon v-html="hourlyIcon.template" size="24px"/>
     <div class="main-black-text" style="font-size: large">
       小时天气
     </div>

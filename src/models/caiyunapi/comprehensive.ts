@@ -42,15 +42,15 @@ export interface Comprehensive {
     server_time: number;
     location: number[];
     result: ComprehensiveResult;
-    error?: string | 'token is invalid' | "'latitude out of bounds!'"
+    error?: string | 'token is invalid' | "latitude out of bounds!"
 }
 
 export interface ComprehensiveResult {
-    alert: AlertResult,
-    realtime: RealtimeData,
-    minutely: MinutelyData,
-    hourly: HourlyData,
-    daily: DailyData,
-    primary: number;
+    alert?: AlertResult,
+    realtime?: RealtimeData,
+    minutely?: MinutelyData,
+    hourly?: HourlyData,
+    daily?: DailyData,
+    primary?: number;
     forecast_keypoint: string;
 }

@@ -1,1 +1,1 @@
-export const publicToken = '';
+export const publicToken = 'mkhvpq9w0AsN6gjl';

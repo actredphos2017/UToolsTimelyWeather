@@ -113,8 +113,10 @@ const hazeBackground = (timestampInSeconds: number) => {
 
 const blackBackground = sunnyBackground;
 
-export function parseWeatherBackground(skycon: string, timestampInSeconds: number) {
+export function parseWeatherBackground(skycon: string | undefined, timestampInSeconds: number) {
     switch (skycon) {
+        case undefined:
+            return sunnyBackground(timestampInSeconds);
         case "CLEAR_DAY":
         case "CLEAR_NIGHT":
             return sunnyBackground(timestampInSeconds);

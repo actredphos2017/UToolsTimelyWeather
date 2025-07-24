@@ -87,9 +87,14 @@ function getCityInfo() {
         longitude: locateResult.value.longitude,
         name: 'undefined'
       })
-          .then(res => {
-            locateCityName.value = res.result.alert.adcodes.map(e => e.name).join(' ');
-          })
+          .then(res => new Promise<void>((resolve, reject) => {
+            if (res.result.alert) {
+              locateCityName.value = res.result.alert.adcodes.map(e => e.name).join(' ');
+              resolve();
+            } else {
+              reject();
+            }
+          }))
           .catch(() => {
             ElMessage.error('彩云 API 获取城市信息失败，请手动输入');
             locateNeedManualInputCityName.value = true;
@@ -159,9 +164,14 @@ function getInputCityInfo() {
       longitude: parseFloat(inputLocationForm.longitude),
       name: 'undefined'
     })
-        .then(res => {
-          inputLocationForm.name = res.result.alert.adcodes.map(e => e.name).join(' ');
-        })
+        .then(res => new Promise<void>((resolve, reject) => {
+          if (res.result.alert) {
+            inputLocationForm.name = res.result.alert.adcodes.map(e => e.name).join(' ');
+            resolve();
+          } else {
+            reject();
+          }
+        }))
         .catch(() => {
           ElMessage.error('彩云 API 获取城市信息失败，请手动输入');
         })

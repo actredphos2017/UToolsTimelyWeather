@@ -78,6 +78,7 @@ export function getPrecipitationStrengthRectangles(maxPrecipitation: number, max
 }
 
 
-export function precipitationActive(minutelyData: MinutelyData): boolean {
+export function precipitationActive(minutelyData: MinutelyData | undefined): boolean {
+    if (!minutelyData) return false;
     return Math.max(...minutelyData.precipitation_2h) > 0;
 }

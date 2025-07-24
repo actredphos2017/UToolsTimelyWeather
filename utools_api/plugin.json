@@ -1,0 +1,15 @@
+{
+    "main": "index.html",
+    "logo": "logo.png",
+    "preload": "preload.js",
+    "features": [
+        {
+            "code": "weather",
+            "explain": "及时天气",
+            "cmds": [
+                "天气",
+                "weather"
+            ]
+        }
+    ]
+}

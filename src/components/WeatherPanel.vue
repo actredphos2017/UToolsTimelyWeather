@@ -20,7 +20,7 @@ watch(weatherInfo, newValue => {
 
 const realtimeWeatherBackground = computed(
     () => parseWeatherBackground(
-        weatherInfo.value.result.realtime.skycon,
+        weatherInfo.value.result.realtime?.skycon,
         weatherInfo.value.server_time
     )
 );
@@ -72,13 +72,13 @@ onUnmounted(() => {
       </el-card>
     </div>
 
-    <div class="info-container">
+    <div v-if="weatherInfo.result.hourly" class="info-container">
       <BlurCard :realtime-weather-background="realtimeWeatherBackground" info-size="info-size-1">
         <HourlyCard :hourly-data="weatherInfo.result.hourly"/>
       </BlurCard>
     </div>
 
-    <div class="info-container">
+    <div v-if="weatherInfo.result.daily" class="info-container">
       <BlurCard info-size="info-size-1" :realtime-weather-background="realtimeWeatherBackground">
         <DailyCard :daily-data="weatherInfo.result.daily"/>
       </BlurCard>

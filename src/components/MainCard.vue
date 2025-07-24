@@ -25,13 +25,13 @@ const updateTime = computed(() => formatDate(weatherInfo.value.server_time));
 <template>
   <div style="width: 100%; position: relative" class="info-size-2" :style="backgroundStyle">
     <div class="realtime-info-container">
-      <div style="padding-top: 12px">
+      <div v-if="weatherInfo.result.alert" style="padding-top: 12px">
         <span class="main-white-text" style="font-size: large;">
           {{ weatherInfo.result.alert.adcodes.map(entry => entry.name).join(' ') }}
         </span>
       </div>
       <div style="display: flex; justify-content: space-between; width: 100%">
-        <div class="side-info-wrapper" style="align-items: start">
+        <div v-if="weatherInfo.result.realtime" class="side-info-wrapper" style="align-items: start">
           <div class="main-white-text" style=" font-size: xxx-large">
             <span>{{ weatherInfo.result.realtime.temperature }}</span>
             <span style="font-size: xx-large">℃</span>
@@ -56,14 +56,16 @@ const updateTime = computed(() => formatDate(weatherInfo.value.server_time));
         </div>
         <div class="side-info-wrapper" style="align-items: end">
           <AlertTip
+              v-if="weatherInfo.result.alert"
               v-for="alertContent in weatherInfo.result.alert.content"
               :key="alertContent.alertId"
               :alert-content="alertContent"
           />
           <PrecipitationTip
-              :minutely-data="weatherInfo.result.minutely"
               v-if="precipitationActive(weatherInfo.result.minutely)"
+              :minutely-data="weatherInfo.result.minutely!"
           />
+
           <div class="secondary-white-text" style="font-size: smaller">
             {{ updateTime }} 更新
           </div>

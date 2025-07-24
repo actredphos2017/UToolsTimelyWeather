@@ -23,10 +23,18 @@ const detailEachWidth = ref(0);
 
 watch([dailyInstances, graph], updateGraph, {immediate: true});
 
-function updateGraph() {
+const canvasWidth = ref(0);
+
+async function updateGraph() {
   if (!graph.value) return;
+  canvasWidth.value = dailyInstances.value.length * 96;
+  await new Promise((r) => {
+    requestAnimationFrame(r)
+  });
+
   let ctx = graph.value.getContext('2d');
   if (!ctx) return;
+
   ctx.clearRect(0, 0, graph.value!.width, graph.value!.height);
 
   const virtualSize = 1000;
@@ -169,17 +177,18 @@ function mouseLeaveDetailBlock() {
 
 <template>
   <div style="height: 40px; display: flex; gap: 4px; align-items: center; padding-left: 12px">
-    <el-icon v-html="dailyIcon.template" size="32px"/>
+    <el-icon v-html="dailyIcon.template" size="24px"/>
     <span class="main-black-text" style="font-size: large">
       未来天气
     </span>
   </div>
   <div style="height: 210px">
     <el-scrollbar>
-      <div style="width: 1200px; height: 200px; position: relative">
-        <canvas style="position: absolute" ref="graph" width="1200" height="200"/>
+      <div style="height: 200px; position: relative">
+        <canvas style="position: absolute" ref="graph" :width="canvasWidth" height="200"/>
         <div
-            style="display: flex; width: 1200px; height: 200px;"
+            style="display: flex; height: 200px;"
+            :style="{width: `${canvasWidth}px`}"
             @mouseleave="mouseLeaveDetailBlock"
         >
           <div

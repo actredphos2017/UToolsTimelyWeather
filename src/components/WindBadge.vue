@@ -9,9 +9,9 @@ interface Props {
     direction: number,
     speed: number
   },
-  backgroundColor: string,
-  innerFontColor: string,
-  outerFontColor: string
+  backgroundColor?: string,
+  innerFontColor?: string,
+  outerFontColor?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {

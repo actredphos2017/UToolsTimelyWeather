@@ -16,6 +16,12 @@ const settings = useSettingStore();
 
 const weatherInfo = ref<undefined | Comprehensive>();
 
+watch(weatherInfo, (newValue) => {
+  if (newValue) {
+    console.log(JSON.stringify(newValue))
+  }
+}, {immediate: true})
+
 function startGuide() {
   displayGuideDialog.value = true
 }
