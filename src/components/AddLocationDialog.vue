@@ -6,6 +6,7 @@ import {CityCenter, SavableLocation, searchCitiesByName} from "../models/city_ce
 import {ElMessage} from "element-plus";
 import {useLocationListStore, useSettingStore, useWeatherHistoryStore} from "../plugins/store.ts";
 import {LongLatitude} from "../models/models.ts";
+import {cpy} from "../utils";
 
 const displayAddCityDialog = defineModel({
   default: false
@@ -269,7 +270,7 @@ function addSavableLocation(loc: SavableLocation) {
             <span>
               您可以前往 lbs.amap.com/tools/picker
             </span>
-            <a href="https://lbs.amap.com/tools/picker" class="styled-a-tag">
+            <a @click="cpy('https://lbs.amap.com/tools/picker')" class="styled-a-tag">
               高德坐标拾取器
             </a>
             <span>
@@ -345,7 +346,7 @@ function addSavableLocation(loc: SavableLocation) {
               <span>
                 您可以前往 lbs.amap.com/tools/picker
               </span>
-              <a href="https://lbs.amap.com/tools/picker" class="styled-a-tag">
+              <a @click="cpy('https://lbs.amap.com/tools/picker')" class="styled-a-tag">
                 高德坐标拾取器
               </a>
               <span>

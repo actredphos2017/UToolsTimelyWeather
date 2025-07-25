@@ -49,5 +49,6 @@ body::-webkit-scrollbar {
 
 .styled-a-tag {
     text-decoration-line: none;
-    color: #66aaf3
+    color: #66aaf3;
+    cursor: pointer;
 }
