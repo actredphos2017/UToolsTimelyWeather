@@ -134,6 +134,18 @@ const inputLocationForm = reactive({
   name: ''
 });
 
+const latitudeInput = ref();
+
+const handleLongitudeChange = () => {
+  const parts = inputLocationForm.longitude.split(",").map(e => e.trim());
+  if (parts.length != 2 || parts.some(e => e.length == 0)) return;
+  const nums = parts.map(Number);
+  if (nums.some(e => isNaN(e) || !isFinite(e))) return;
+  inputLocationForm.longitude = parts[0];
+  inputLocationForm.latitude = parts[1];
+  latitudeInput.value?.focus();
+}
+
 const gettingInputCityInfo = ref(false);
 const getInputCityInfoAvailable = computed(() => (
     !isNaN(parseFloat(inputLocationForm.latitude)) &&
@@ -375,6 +387,7 @@ function addSavableLocation(loc: SavableLocation) {
                         v-model="inputLocationForm.longitude"
                         style="width: 120px"
                         placeholder="国内 73~136"
+                        @input="handleLongitudeChange"
                     />
                   </div>
 
@@ -384,6 +397,7 @@ function addSavableLocation(loc: SavableLocation) {
                     </div>
                     <el-input
                         v-model="inputLocationForm.latitude"
+                        ref="latitudeInput"
                         style="width: 120px"
                         placeholder="国内 3~54"
                     />
