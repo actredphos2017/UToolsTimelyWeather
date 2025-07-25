@@ -1,17 +1,7 @@
 import {HourlyData} from "../models/caiyunapi/hourly.ts";
 import {DailyData} from "../models/caiyunapi/daily.ts";
 
-export function getTimeRoundToMinuteString(date: Date) {
-    let h = date.getHours().toString();
-    while (h.length < 2) {
-        h = '0' + h;
-    }
-    let m = date.getMinutes().toString();
-    while (m.length < 2) {
-        m = '0' + m;
-    }
-    return `${h}:${m}`
-}
+export const getTimeRoundToMinuteString = (date: Date) => `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 
 export function formatDate(secondTimeMill: number | Date) {
     let date: Date;
@@ -27,7 +17,7 @@ export function formatDate(secondTimeMill: number | Date) {
         date.getMonth() == nowDate.getMonth() &&
         date.getDate() == nowDate.getDate()
     ) {
-        return `${date.getHours()}:${date.getMinutes()}`;
+        return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
     }
 
     nowDate.setDate(nowDate.getDate() - 1);
@@ -37,10 +27,10 @@ export function formatDate(secondTimeMill: number | Date) {
         date.getMonth() == nowDate.getMonth() &&
         date.getDate() == nowDate.getDate()
     ) {
-        return `昨天 ${getTimeRoundToMinuteString(date)}`;
+        return `昨天 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
     }
 
-    return `${date.getMonth()}月${date.getDate()}日 ${getTimeRoundToMinuteString(date)}`;
+    return `${date.getMonth()}月${date.getDate()}日 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
 
 const dayMapper = [
@@ -573,5 +563,5 @@ export function parseWindLevelDescription(windSpeed: number): { levelName: strin
         desc = "未知";
     }
 
-    return { levelName, desc };
+    return {levelName, desc};
 }
