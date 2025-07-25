@@ -4,7 +4,7 @@ import {computed, ref, watch} from "vue";
 import {MinutelyData} from "../models/caiyunapi/minutely.ts";
 import {precipitationIcon} from "../utils/icons.ts";
 import {Aim} from "@element-plus/icons-vue";
-import {definePositionMapper} from "../utils/canvas_utils.ts";
+import {definePositionMapperOf} from "../utils/canvas_utils.ts";
 
 const props = defineProps<{
   minutelyData: MinutelyData
@@ -35,7 +35,7 @@ function updateGraph() {
 
   const virtualSize = 1000;
 
-  const positionMapper = definePositionMapper(
+  const positionMapper = definePositionMapperOf(
       graph.value,
       virtualSize,
       paddingLeft,

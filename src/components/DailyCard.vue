@@ -3,13 +3,14 @@
 import {DailyData} from "../models/caiyunapi/daily.ts";
 import {computed, ref, watch} from "vue";
 import {DailyInstance, getDailyInstance, getFriendlyDateString} from "../utils/utils.ts";
-import {definePositionMapper} from "../utils/canvas_utils.ts";
+import {definePositionMapper, definePositionMapperOf} from "../utils/canvas_utils.ts";
 import {dailyIcon} from "../utils/icons.ts";
 import {parseWeatherIcon, parseWeatherName} from "../utils/resource_parser.ts";
 import TipCard from "./TipCard.vue";
 import {Bottom, InfoFilled, Top} from "@element-plus/icons-vue";
 import AQIBadge from "./AQIBadge.vue";
 import WindBadge from "./WindBadge.vue";
+import {nextFrame} from "../utils";
 
 const props = defineProps<{
   dailyData: DailyData
@@ -19,36 +20,44 @@ const dailyInstances = computed(() => getDailyInstance(props.dailyData));
 
 const graph = ref<HTMLCanvasElement>();
 
-const detailEachWidth = ref(0);
-
 watch([dailyInstances, graph], updateGraph, {immediate: true});
 
 const canvasWidth = ref(0);
+const canvasHeight = 200;
+const unitWidth = 80;
+
+const canvasSizeStyle = computed(() => ({width: `${canvasWidth.value}px`, height: `${canvasHeight}px`}));
 
 async function updateGraph() {
   if (!graph.value) return;
-  canvasWidth.value = dailyInstances.value.length * 96;
-  await new Promise((r) => {
-    requestAnimationFrame(r)
-  });
+  canvasWidth.value = dailyInstances.value.length * unitWidth;
+  await nextFrame();
+  const dpr = window.devicePixelRatio;
+  const originSize = {
+    width: canvasWidth.value * dpr,
+    height: canvasHeight * dpr
+  };
+  graph.value.width = originSize.width;
+  graph.value.height = originSize.height;
+  await nextFrame();
 
   let ctx = graph.value.getContext('2d');
   if (!ctx) return;
+  ctx.clearRect(0, 0, originSize.width, originSize.height);
 
-  ctx.clearRect(0, 0, graph.value!.width, graph.value!.height);
-
-  const virtualSize = 1000;
-
-  const defaultMapper = definePositionMapper(graph.value, virtualSize);
+  const virtualSize = canvasWidth.value * 10;
+  const defaultMapper = definePositionMapper({
+    virtualSize,
+    canvasInstance: graph.value
+  });
 
   const maxTemperatures = dailyInstances.value.map(e => e.temperature?.max ?? 0);
   const minTemperatures = dailyInstances.value.map(e => e.temperature?.min ?? 0);
 
   const maxTemperature = Math.max(...maxTemperatures);
   const minTemperature = Math.min(...minTemperatures);
-
   const eachWidth = virtualSize / dailyInstances.value.length;
-  detailEachWidth.value = defaultMapper(eachWidth, 0)[0];
+
 
   // 画分割线
   const [divisionLineGradientStartX, divisionLineGradientStartY] = defaultMapper(0, 0);
@@ -74,13 +83,13 @@ async function updateGraph() {
   ctx.save();
 
   // 温度折线图点位
-  const graphMapper = definePositionMapper(
+  const graphMapper = definePositionMapperOf(
       graph.value!,
       virtualSize,
       0,
       0,
-      76,
-      46
+      76 * dpr,
+      46 * dpr
   );
   const maxPoints = maxTemperatures.map(
       (value, index) => ({
@@ -105,7 +114,8 @@ async function updateGraph() {
   const [graphLTX, graphLTY] = graphMapper(eachWidth / 2, virtualSize);
 
   // 画高位线及其阴影
-  ctx.strokeStyle = 'blue';
+  ctx.strokeStyle = '#007fff';
+  ctx.lineWidth = dpr;
   ctx.beginPath();
   maxPoints.forEach((p, i) => {
     if (i == 0) {
@@ -126,7 +136,7 @@ async function updateGraph() {
   ctx.save();
 
   // 画低位线
-  ctx.strokeStyle = 'blue';
+  ctx.strokeStyle = '#0080ff';
   ctx.beginPath();
   minPoints.forEach((p, i) => {
     if (i == 0) {
@@ -139,24 +149,15 @@ async function updateGraph() {
   ctx.save();
 
   // 画圆
-  maxPoints.forEach(p => {
-    ctx.fillStyle = '#fff';
-    ctx.strokeStyle = '#00f';
+  ctx.fillStyle = '#fff';
+  ctx.strokeStyle = '#0081ff';
+  [maxPoints, minPoints].forEach(ps => ps.forEach(p => {
     ctx.beginPath();
-    ctx.arc(p.position[0], p.position[1], 3, 0, Math.PI * 2);
+    ctx.arc(p.position[0], p.position[1], 3 * dpr, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
     ctx.closePath();
-  });
-  minPoints.forEach(p => {
-    ctx.fillStyle = '#fff';
-    ctx.strokeStyle = '#00f';
-    ctx.beginPath();
-    ctx.arc(p.position[0], p.position[1], 3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-    ctx.closePath();
-  });
+  }));
   ctx.save();
 }
 
@@ -184,22 +185,22 @@ function mouseLeaveDetailBlock() {
   </div>
   <div style="height: 210px">
     <el-scrollbar>
-      <div style="height: 200px; position: relative">
-        <canvas style="position: absolute" ref="graph" :width="canvasWidth" height="200"/>
+      <div style="position: relative">
+        <canvas ref="graph" style="position: absolute"
+                :style="canvasSizeStyle"/>
         <div
-            style="display: flex; height: 200px;"
-            :style="{width: `${canvasWidth}px`}"
+            style="display: flex"
+            :style="canvasSizeStyle"
             @mouseleave="mouseLeaveDetailBlock"
         >
           <div
               v-for="dailyInstance in dailyInstances"
               :key="dailyInstance.date.getTime()"
 
-              @mouseenter="mouseEnterDetailBlock(dailyInstance)"
-
               class="detail-block"
               style="z-index: 10; display: flex; flex-direction: column; justify-content: space-between; align-items: center"
-              :style="{width: `${detailEachWidth}px`}"
+              :style="{width: `${unitWidth}px`, height: `${canvasHeight}px`}"
+              @mouseenter="mouseEnterDetailBlock(dailyInstance)"
           >
 
             <div

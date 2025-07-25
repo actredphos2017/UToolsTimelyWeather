@@ -2,13 +2,14 @@
 
 import {HourlyData} from "../models/caiyunapi/hourly.ts";
 import {computed, ref, watch} from "vue";
-import {definePositionMapper} from "../utils/canvas_utils.ts";
+import {definePositionMapper, definePositionMapperOf} from "../utils/canvas_utils.ts";
 import {getHourlyInstances, getTimeRoundToMinuteString, HourlyInstance} from "../utils/utils.ts";
 import {hourlyIcon} from "../utils/icons.ts";
 import {parseWeatherIcon, parseWeatherName} from "../utils/resource_parser.ts";
 import {InfoFilled} from "@element-plus/icons-vue";
 import AQIBadge from "./AQIBadge.vue";
 import TipCard from "./TipCard.vue";
+import {nextFrame} from "../utils";
 
 const props = defineProps<{
   hourlyData: HourlyData
@@ -18,24 +19,42 @@ const hourlyInstances = computed(() => getHourlyInstances(props.hourlyData));
 
 const graph = ref<HTMLCanvasElement>();
 
-const detailEachWidth = ref(0);
-
 watch([graph, hourlyInstances], updateGraph, {immediate: true});
 
-function updateGraph() {
+
+const canvasWidth = ref(0);
+const canvasHeight = 200;
+const unitWidth = 64;
+
+const canvasSizeStyle = computed(() => ({width: `${canvasWidth.value}px`, height: `${canvasHeight}px`}));
+
+async function updateGraph() {
   if (!graph.value) return;
+  canvasWidth.value = hourlyInstances.value.length * unitWidth;
+  await nextFrame();
+  const dpr = window.devicePixelRatio;
+  const originSize = {
+    width: canvasWidth.value * dpr,
+    height: canvasHeight * dpr
+  };
+  graph.value.width = originSize.width;
+  graph.value.height = originSize.height;
+  await nextFrame();
+
   let ctx = graph.value.getContext('2d');
   if (!ctx) return;
-  ctx.clearRect(0, 0, graph.value!.width, graph.value!.height);
+  ctx.clearRect(0, 0, originSize.width, originSize.height);
 
-  const virtualSize = 1000;
-  const defaultMapper = definePositionMapper(graph.value, virtualSize);
+  const virtualSize = canvasWidth.value * 10;
+  const defaultMapper = definePositionMapper({
+    virtualSize,
+    canvasInstance: graph.value
+  });
 
   const temperatures = hourlyInstances.value.map(e => e.temperature);
   const maxTemperature = Math.max(...temperatures.map(e => (e ?? 0)));
   const minTemperature = Math.min(...temperatures.map(e => (e ?? 0)));
   const eachWidth = virtualSize / hourlyInstances.value.length;
-  detailEachWidth.value = defaultMapper(eachWidth, 0)[0];
 
   // 画分割线
   const [divisionLineGradientStartX, divisionLineGradientStartY] = defaultMapper(0, 0);
@@ -50,6 +69,7 @@ function updateGraph() {
   divisionLineGradient.addColorStop(0.5, 'rgba(0,0,0,0.5)');
   divisionLineGradient.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.strokeStyle = divisionLineGradient;
+  ctx.lineWidth = dpr;
   for (let i = 1; i < hourlyInstances.value.length; i++) {
     const x = eachWidth * i;
     const [startX, startY] = defaultMapper(x, virtualSize);
@@ -61,7 +81,14 @@ function updateGraph() {
   ctx.save();
 
   // 温度折线图点位
-  const graphMapper = definePositionMapper(graph.value!, virtualSize, 0, 0, 100, 50);
+  const graphMapper = definePositionMapperOf(
+      graph.value!,
+      virtualSize,
+      0,
+      0,
+      100 * dpr,
+      50 * dpr
+  );
   const points = temperatures.map(
       (value, index) => ({
         position: graphMapper(
@@ -76,7 +103,7 @@ function updateGraph() {
   const [graphLTX, graphLTY] = graphMapper(eachWidth / 2, virtualSize);
 
   // 画线
-  ctx.strokeStyle = 'blue';
+  ctx.strokeStyle = '#0081ff';
   ctx.beginPath();
   points.forEach((p, i) => {
     if (i == 0) {
@@ -97,11 +124,11 @@ function updateGraph() {
   ctx.save();
 
   // 画圆
+  ctx.fillStyle = '#fff';
+  ctx.strokeStyle = '#0081ff';
   points.forEach(p => {
-    ctx.fillStyle = '#fff';
-    ctx.strokeStyle = '#00f';
     ctx.beginPath();
-    ctx.arc(p.position[0], p.position[1], 3, 0, Math.PI * 2);
+    ctx.arc(p.position[0], p.position[1], 3 * dpr, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
     ctx.closePath();
@@ -113,7 +140,7 @@ function updateGraph() {
     ctx.save();
     ctx.translate(p.position[0], p.position[1]);
     ctx.rotate(-20 * Math.PI / 180);
-    ctx.font = '13px Arial';
+    ctx.font = `${13 * dpr}px Arial`;
     ctx.fillStyle = '#000';
     ctx.textAlign = 'left';
     ctx.fillText(p.temperatureText, 6, -5);
@@ -128,6 +155,7 @@ function mouseEnterDetailBlock(hourlyInstance: HourlyInstance) {
   targetHourlyInstance.value = hourlyInstance;
   tipVisible.value = true;
 }
+
 function mouseLeaveDetailBlock() {
   targetHourlyInstance.value = null;
   tipVisible.value = false;
@@ -144,10 +172,12 @@ function mouseLeaveDetailBlock() {
   </div>
   <div style="height: 210px;">
     <el-scrollbar>
-      <div style="width: 1600px; height: 200px; position: relative;">
-        <canvas ref="graph" width="1600" height="200" style="position: absolute;"/>
+      <div style="position: relative">
+        <canvas ref="graph" style="position: absolute"
+                :style="canvasSizeStyle"/>
         <div
-            style="display: flex; width: 1600px; height: 200px;"
+            style="display: flex"
+            :style="canvasSizeStyle"
             @mouseleave="mouseLeaveDetailBlock"
         >
           <div
@@ -156,7 +186,7 @@ function mouseLeaveDetailBlock() {
 
               class="detail-block"
               style="z-index: 10; display: flex; flex-direction: column; justify-content: space-between"
-              :style="{width: `${detailEachWidth}px`}"
+              :style="{width: `${unitWidth}px`, height: `${canvasHeight}px`}"
               @mouseenter="mouseEnterDetailBlock(hourlyInstance)"
           >
             <div v-if="hourlyInstance.skycon"
@@ -192,7 +222,8 @@ function mouseLeaveDetailBlock() {
       <div style="font-size: medium">
         体感 {{ targetHourlyInstance.apparent_temperature }}℃
       </div>
-      <div v-if="targetHourlyInstance.skycon" style="font-size: medium; display: flex; align-items: center; gap: 4px; height: 40px">
+      <div v-if="targetHourlyInstance.skycon"
+           style="font-size: medium; display: flex; align-items: center; gap: 4px; height: 40px">
         <span>{{ parseWeatherName(targetHourlyInstance.skycon) }}</span>
         <img :src="parseWeatherIcon(targetHourlyInstance.skycon)" style="width: 32px" alt="天气图标"/>
         <div v-if="targetHourlyInstance.precipitation && targetHourlyInstance.precipitation.probability > 0"
