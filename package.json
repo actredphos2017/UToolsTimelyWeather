@@ -5,7 +5,7 @@
   "type": "commonjs",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build && xcopy utools_api\\* utools_project\\",
+    "build": "vue-tsc && vite build && xcopy utools_api\\logo.png utools_project && xcopy utools_api\\plugin.json utools_project && xcopy utools_api\\preload.js utools_project",
     "preview": "vite preview"
   },
   "dependencies": {
